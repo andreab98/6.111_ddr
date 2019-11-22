@@ -1,0 +1,25 @@
+# ignore build files
+
+*.cache
+*.hw
+*.runs
+*.sim
+*.ip_user_files
+*.xpr
+
+# ignore logs
+
+*.log
+*.jou
+*.str
+
+# ignore ip files except for .xci files
+visual/visual.srcs/sources_1/ip/*
+!visual/visual.srcs/sources_1/ip/*/
+visual/visual.srcs/sources_1/ip/*/*
+!visual/visual.srcs/sources_1/ip/*/*.xci
+
+# ignore import sources
+visual/visual.srcs/constrs_1/imports
+visual/visual.srcs/sources_1/imports
+
