@@ -19,6 +19,11 @@ module top_level(
     // create 65mhz system clock, happens to match 1024 x 768 XVGA timing
     clk_wiz_lab3 clkdivider(.clk_in1(clk_100mhz), .clk_out1(clk_65mhz));
     
+    //selector integration
+    reg[3:0] speed;
+    selector select(.clk(clk_65mhz), 
+                    .level(sw[1:0]),.start(sw[15]),
+                    .speed(speed));
     
     //sensor integration
     wire[5:0] test_sensors;
@@ -29,7 +34,7 @@ module top_level(
     wire phsync,pvsync,pblank;
     wire[11:0] visual_pixels;
     visual v(.clk(clk_65mhz),.pvsync(pvsync),.phsync(phsync),
-            .ready_start(sw[15]),.speed(sw[3:0]),
+            .ready_start(sw[15]),.speed(speed),
             .visual_pixels(visual_pixels));
     reg b,hs,vs;
     reg [11:0] rgb;
