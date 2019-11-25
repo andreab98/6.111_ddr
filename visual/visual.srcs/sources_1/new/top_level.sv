@@ -3,6 +3,9 @@
 module top_level(
    input clk_100mhz,
    input[15:0] sw,
+   input[7:0] jb,
+   
+   output[15:0] led,
    
    output[3:0] vga_r,
    output[3:0] vga_b,
@@ -16,6 +19,13 @@ module top_level(
     // create 65mhz system clock, happens to match 1024 x 768 XVGA timing
     clk_wiz_lab3 clkdivider(.clk_in1(clk_100mhz), .clk_out1(clk_65mhz));
     
+    
+    //sensor integration
+    wire[5:0] test_sensors;
+    sensor s(.clk(clk_65mhz), .jb_sensors(jb[5:0]),.test_sensors(test_sensors));
+    assign led[5:0] = test_sensors;
+    
+    //visual integration
     wire phsync,pvsync,pblank;
     wire[11:0] visual_pixels;
     visual v(.clk(clk_65mhz),.pvsync(pvsync),.phsync(phsync),
