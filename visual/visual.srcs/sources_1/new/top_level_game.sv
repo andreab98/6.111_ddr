@@ -60,8 +60,4 @@ module top_level_game(input clk_100mhz, // system clock
                            .score_ready(score_ready), .correct(correct),
                            .updated_score(score));
                            
-    // Display score on hex   
-    logic [6:0] led_out;                          
-    seven_seg_controller seven(.clk_in(clk_100mhz), .rst_in(btnr), .val_in(score), .cat_out(), .an_out(an));
-    assign {cg, cf, ce, cd, cc, cb, ca} = led_out;    
 endmodule
