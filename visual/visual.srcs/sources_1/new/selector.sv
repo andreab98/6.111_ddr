@@ -3,10 +3,21 @@ module selector(
         input clk,
         input[1:0] level,
         input start,
+        input[10:0] hcount,
+        input[9:0] vcount,
+        input hsync,vsync,blank,
         
+        output phsync_out,
+        output pvsync_out,    
+        output pblank_out, 
+                    
         output[11:0] menu_pixels,
         output logic[3:0] speed  
     );
+    
+    assign phsync_out = hsync;
+    assign pvsync_out = vsync;
+    assign pblank_out = blank;
     
     parameter LEVEL_1 = 2'b01;
     parameter LEVEL_2 = 2'b10;
@@ -32,5 +43,14 @@ module selector(
         end
     end
     
+    // menu pixels
+    logic[10:0] x_begin = 11'd300;
+    logic[9:0] y_begin = 10'd200; 
     
+    wire[11:0] menu_p;
+    menu_blob m(.pixel_clk_in(clk),.x_in(x_begin),.hcount_in(hcount),.y_in(y_begin),.vcount_in(vcount),
+                        .pixel_out(menu_p));
+    
+    assign menu_pixels = menu_p;
+
 endmodule

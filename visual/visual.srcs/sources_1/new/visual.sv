@@ -4,18 +4,13 @@ module visual(
    input clk,
    input[3:0] speed,
    input ready_start,
+   input[10:0] hcount,
+   input[9:0] vcount,
+   input hsync,vsync,blank,
    
    output phsync,pvsync,pblank,
    output[11:0] visual_pixels
    );
-  
-    wire [10:0] hcount;    // pixel on current line
-    wire [9:0] vcount;     // line number
-    wire hsync, vsync;
-    logic blank;
-    xvga xvga1(.vclock_in(clk),.hcount_out(hcount),.vcount_out(vcount),
-          .hsync_out(hsync),.vsync_out(vsync),.blank_out(blank));
-    
     wire[3:0] state;
     wire[3:0] nesw;
     wire[11:0] arrow_pixels;

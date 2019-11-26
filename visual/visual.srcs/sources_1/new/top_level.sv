@@ -42,32 +42,55 @@ module top_level(
     debounce deb_start(.clock_in(clk_100mhz), .noisy_in(btnc), .clean_out(start));
     debounce deb_reset(.clock_in(clk_100mhz), .noisy_in(btnr), .clean_out(reset));   
     
+    //xvga for selector and visual modules
+    wire [10:0] hcount;    // pixel on current line
+    wire [9:0] vcount;     // line number
+    wire hsync, vsync;
+    logic blank;
+    xvga xvga1(.vclock_in(clk_65mhz),.hcount_out(hcount),.vcount_out(vcount),
+          .hsync_out(hsync),.vsync_out(vsync),.blank_out(blank));
+    
     //selector integration
     reg[3:0] speed;
-    selector select(.clk(clk_65mhz), 
+    wire [11:0] menu_pixels;
+    wire phsync_m,pvsync_m,pblank_m;
+    selector select(.clk(clk_65mhz), .hcount(hcount),.vcount(vcount),
+                    .hsync(hsync), .vsync(vsync), .blank(blank),
                     .level(sw[1:0]),.start(start),
-                    .speed(speed));
+                    .speed(speed),.menu_pixels(menu_pixels),
+                    .phsync_out(phsync_m),.pvsync_out(pvsync_m),.pblank_out(pblank_m));
     
     //sensor integration
     wire[5:0] test_sensors;
-    sensor s(.clk(clk_65mhz), .jb_sensors(jb[5:0]),.test_sensors(test_sensors));
+    wire[8:0] out_data;
+    sensor s(.clk(clk_65mhz), .jb_sensors(jb[5:0]),.test_sensors(test_sensors), .out_data(out_data));
     assign led[5:0] = test_sensors;
     
     //visual integration
-    wire phsync,pvsync,pblank;
+    wire phsync_vis,pvsync_vis,pblank_vis;
     wire[11:0] visual_pixels;
-    visual v(.clk(clk_65mhz),.pvsync(pvsync),.phsync(phsync),
-            .ready_start(start), .reset(reset), .speed(speed),
+
+    visual v(.clk(clk_65mhz), .pvsync(pvsync_vis), .phsync(phsync_vis), .pblank(pblank_vis),
+            .ready_start(start), .speed(speed),
+            .vcount(vcount), .hcount(hcount), .hsync(hsync), .vsync(vsync), .blank(blank),
             .visual_pixels(visual_pixels));
     reg b,hs,vs;
     reg [11:0] rgb;
     always_ff @(posedge clk_65mhz) begin
          // default: pong
-         hs <= phsync;
-         vs <= pvsync;
-         b <= pblank;
-         rgb <= visual_pixels;
+         if (start) begin 
+            hs <= phsync_vis;
+            vs <= pvsync_vis;
+            b <= pblank_vis;
+            rgb <= visual_pixels;
+         end else begin
+             hs <= phsync_m;
+             vs <= pvsync_m;
+             b <= pblank_m;
+             rgb <= menu_pixels;
+        end
     end
+    
     // the following lines are required for the Nexys4 VGA circuit - do not change
     assign vga_r = ~b ? rgb[11:8]: 0;
     assign vga_g = ~b ? rgb[7:4] : 0;
@@ -76,13 +99,31 @@ module top_level(
     assign vga_hs = ~hs;
     assign vga_vs = ~vs;
     
+
+    wire [31:0] data_display;      //  instantiate 7-segment display; display (8) 4-bit hex
+    wire [6:0] segments;
+    assign {cg, cf, ce, cd, cc, cb, ca} = segments[6:0];
+    display_8hex hex8(.clk_in(clk_65mhz),.data_in(data_display), .seg_out(segments), .strobe_out(an));
+    
+
+//    assign data_display = {3'b00,out_data[8],
+//                            3'b00,out_data[7],
+//                            3'b00,out_data[6],
+//                            3'b00,out_data[5],
+//                            3'b00,out_data[3],
+//                            3'b00,out_data[2],
+//                            3'b00,out_data[1],
+//                            3'b00,out_data[0]}; 
+//    assign data_display = {20'b0, rgb};
+
+
     // audio integration 
     top_level_audio audio(.clk(clk_100mhz), .clk_25mhz(clk_25mhz), .start(start), .reset(reset), .sd_cd(sd_cd), // start from selector?
                             .selection(sw[1:0]), .sd_dat(sd_dat), .sd_reset(sd_reset), .sd_sck(sd_sck),
                             .sd_cmd(sd_cmd), .aud_sd(aud_sd), .aud_pwm(aud_pwm));
     // game integration
-    logic [31:0] game_score;
-    top_level_game game(.clk(clk_100mhz), .reset(reset), .start(start), .ca(ca), .cb(cb), .cc(cc), .cd(cd), .ce(ce), .cf(cf), .cg(cg), .an(an));
+    //logic [31:0] game_score;
+    //top_level_game game(.clk(clk_100mhz), .reset(reset), .start(start), .ca(ca), .cb(cb), .cc(cc), .cd(cd), .ce(ce), .cf(cf), .cg(cg), .an(an));
                             
     
     
