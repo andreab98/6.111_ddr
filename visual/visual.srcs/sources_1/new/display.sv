@@ -31,6 +31,7 @@ module display (
     assign phsync_out = hsync_in;
     assign pvsync_out = vsync_in;
     assign pblank_out = blank_in;
+    
     parameter Y_INIT = 600;
     
     logic[11:0] y = Y_INIT;
