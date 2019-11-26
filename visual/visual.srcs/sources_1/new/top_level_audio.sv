@@ -20,11 +20,12 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module top_level_audio(input clk_100mhz,
-                       input btnc, 
-                       input btnr,
+module top_level_audio(input clk,
+                       input clk_25mhz,
+                       input start, // WAS BTNC
+                       input reset, // WAS BTNR
                        input sd_cd,
-                       input [2:0] sw,
+                       input [1:0] selection,
                        
                        inout [3:0] sd_dat,
                        
@@ -37,15 +38,15 @@ module top_level_audio(input clk_100mhz,
     );
     
     // debounce buttons 
-    logic reset; 
-    logic start;
+//    logic reset; 
+//    logic start;
    
-    debounce deb_start(.clock_in(clk_100mhz), .noisy_in(btnc), .clean_out(start));
-    debounce deb_reset(.clock_in(clk_100mhz), .noisy_in(btnr), .clean_out(reset));
+//    debounce deb_start(.clock_in(clk_100mhz), .noisy_in(btnc), .clean_out(start));
+//    debounce deb_reset(.clock_in(clk_100mhz), .noisy_in(btnr), .clean_out(reset));
     
     // must read from SD card on 25MHz clock
-    logic clk_25mhz;
-    clk_wiz_0 sd_clock(.clk_in1(clk_100mhz), .clk_out1(clk_25mhz));
+//    logic clk_25mhz;
+//    clk_wiz_0 sd_clock(.clk_in1(clk), .clk_out1(clk_25mhz));
    
     
     // assign set outputs 
@@ -60,10 +61,10 @@ module top_level_audio(input clk_100mhz,
     parameter WAVING_START_ADDR = 32'hE53000; // Waving Through a Window 
     
     always_comb begin
-        if (sw[2:0] == 3'b000) begin 
+        if (selection[1:0] == 2'b00) begin 
             addr_0 = MORE_START_ADDR;
         end 
-        else if (sw[2:0] == 3'b001) begin 
+        else if (selection[1:0] == 2'b01) begin 
             addr_0 = WAVING_START_ADDR;
         end 
     end 
@@ -80,7 +81,7 @@ module top_level_audio(input clk_100mhz,
     // logic for write operation -- set to 0
     logic wr = 0;
     logic [7:0] din = 0; 
-    logic ready_for_next_byte = 0;
+    logic ready_for_next_byte;
     
     // handles reading from the SD card
     sd_controller sd(.reset(reset), .clk(clk_25mhz), .cs(sd_dat[3]), .mosi(sd_cmd), 
@@ -93,13 +94,13 @@ module top_level_audio(input clk_100mhz,
     logic [7:0] data_from_fifo; // data to PWM
     logic fifo_wr_en; // fifo write enable
     logic fifo_rd_en; // fifo read enable 
-    logic [15:0] data_count; 
+    logic [13:0] data_count; 
     logic fifo_full;
     logic fifo_empty;
     
     // FIFO - handles asynchonous inputs and outputs   
     fifo_generator_0 fifo(.full(fifo_full), .empty(fifo_empty), .din(data_to_fifo), .dout(data_from_fifo), 
-                          .wr_en(fifo_wr_en), .rd_en(fifo_rd_en), .clk(clk_100mhz), .srst(reset), .data_count(data_count));
+                          .wr_en(fifo_wr_en), .rd_en(fifo_rd_en), .clk(clk), .srst(reset), .data_count(data_count));
                            
     // states
     parameter IDLE = 2'b01; // Game not in play
@@ -119,7 +120,7 @@ module top_level_audio(input clk_100mhz,
     parameter MORE_SAMPLES = 14016000;
     parameter WAVING_SAMPLES = 14660128;
     
-    always_ff @(posedge clk_100mhz) begin
+    always_ff @(posedge clk) begin
         //system reset
         if (reset) begin 
             state <= IDLE; 
@@ -144,8 +145,8 @@ module top_level_audio(input clk_100mhz,
                 end                 
             end 
             READ: begin
-                if ((sw[2:0] == 3'b000 && sample_counter >= MORE_SAMPLES) 
-                     || (sw[2:0] == 3'b001 && sample_counter >= WAVING_SAMPLES)) begin // when the song is over... game also over
+                if ((selection[1:0] == 2'b00 && sample_counter >= MORE_SAMPLES) 
+                     || (selection[1:0] == 2'b01 && sample_counter >= WAVING_SAMPLES)) begin // when the song is over... game also over
                      
                     led[15] <= 1;
                     
@@ -204,6 +205,6 @@ module top_level_audio(input clk_100mhz,
     end 
     
     logic sound_out;
-    audio_PWM pwm(.clk(clk_100mhz), .reset(reset), .music_data(data_from_fifo), .PWM_out(aud_pwm));
+    audio_PWM pwm(.clk(clk), .reset(reset), .music_data(data_from_fifo), .PWM_out(aud_pwm));
     
 endmodule
