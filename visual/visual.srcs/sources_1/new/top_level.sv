@@ -57,7 +57,7 @@ module top_level(
     wire phsync,pvsync,pblank;
     wire[11:0] visual_pixels;
     visual v(.clk(clk_65mhz),.pvsync(pvsync),.phsync(phsync),
-            .ready_start(start),.speed(speed),
+            .ready_start(start), .reset(reset), .speed(speed),
             .visual_pixels(visual_pixels));
     reg b,hs,vs;
     reg [11:0] rgb;
