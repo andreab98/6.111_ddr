@@ -20,20 +20,13 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module top_level_game(input clk_100mhz, // system clock
-                      input btnr, // system reset
-                      input btnc, // games start (might not need this)
+module top_level_game(input clk, // system clock
+                      input reset, // system reset
+                      input start, // games start (might not need this)
                       
-                      output logic [7:0] an,
-                      output logic ca, 
-                      output logic cb, 
-                      output logic cc, 
-                      output logic cd, 
-                      output logic ce,
-                      output logic cf, 
-                      output logic cg
-                      
-                      
+                      output ca, cb, cc, cd, ce, cf, cg,  // segments a-g
+                      output[7:0] an    // Display location 0-7
+                       
     );
     
     //Comparison Module Inputs
@@ -46,7 +39,7 @@ module top_level_game(input clk_100mhz, // system clock
     logic correct; // HIGH when the player stepped correctly
     
     
-    game_comparison compare(.clk(clk_100mhz), .correct_data(correct_data), 
+    game_comparison compare(.clk(clk), .correct_data(correct_data), 
                             .intersection_data(intersection_data), .ready_in(ready_in),
                             .score_ready(score_ready), .correct(correct));
                             
@@ -54,10 +47,10 @@ module top_level_game(input clk_100mhz, // system clock
     logic game_over; // HIGH when the game is over (COMES FROM VISUAL MODULE)
     
     //Score FSM Output
-    logic [31:0] score; //score of the game 
-    
-    score_fsm update_score(.clk(clk_100mhz), .start(btnc), .rst_in(btnr), .game_over(game_over), 
+    logic [31:0] score;
+    score_fsm update_score(.clk(clk), .start(start), .rst_in(reset), .game_over(game_over), 
                            .score_ready(score_ready), .correct(correct),
                            .updated_score(score));
-                           
+    
+    display_8hex score_display(.clk_in(clk), .data_in(score), .seg_out({cg, cf, ce, cd, cc, cb, ca}), .strobe_out(an));
 endmodule

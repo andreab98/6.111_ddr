@@ -2,10 +2,16 @@
 
 module top_level(
    input clk_100mhz,
+   input btnc, // start signal
+   input btnr, // system reset
+   input sd_cd, // sd card input
+   
    input[15:0] sw,
    input[7:0] jb,
    
-   output[15:0] led,
+   inout [3:0] sd_dat, // sd cad
+   
+   output[15:0] led, // for debugging
    
    output[3:0] vga_r,
    output[3:0] vga_b,
@@ -13,11 +19,28 @@ module top_level(
    output vga_hs,
    output vga_vs,
    output ca, cb, cc, cd, ce, cf, cg,  // segments a-g
-   output[7:0] an    // Display location 0-7
+   output[7:0] an,    // Display location 0-7
+   
+   //sd card outputs 
+   output logic sd_reset, 
+   output logic sd_sck, 
+   output logic sd_cmd,
+   
+   //audio outputs
+   output logic aud_sd, 
+   output logic aud_pwm
     );
-    logic clk_65mhz;
-    // create 65mhz system clock, happens to match 1024 x 768 XVGA timing
-    clk_wiz_lab3 clkdivider(.clk_in1(clk_100mhz), .clk_out1(clk_65mhz));
+    
+    logic clk_100mhz_out;
+    logic clk_25mhz; // for sd card
+    logic clk_65mhz; // for visual
+    clk_wiz_0 make_clocks(.clk_in1(clk_100mhz),.reset(0), .clk_out1(clk_25mhz), .clk_out2(clk_100mhz_out), .clk_out3(clk_65mhz));
+    
+    logic reset; 
+    logic start;
+    //debounce button inputs 
+    debounce deb_start(.clock_in(clk_100mhz), .noisy_in(btnc), .clean_out(start));
+    debounce deb_reset(.clock_in(clk_100mhz), .noisy_in(btnr), .clean_out(reset));   
     
     //xvga for selector and visual modules
     wire [10:0] hcount;    // pixel on current line
@@ -33,7 +56,7 @@ module top_level(
     wire phsync_m,pvsync_m,pblank_m;
     selector select(.clk(clk_65mhz), .hcount(hcount),.vcount(vcount),
                     .hsync(hsync), .vsync(vsync), .blank(blank),
-                    .level(sw[1:0]),.start(sw[15]),
+                    .level(sw[1:0]),.start(start),
                     .speed(speed),.menu_pixels(menu_pixels),
                     .phsync_out(phsync_m),.pvsync_out(pvsync_m),.pblank_out(pblank_m));
     
@@ -46,15 +69,16 @@ module top_level(
     //visual integration
     wire phsync_vis,pvsync_vis,pblank_vis;
     wire[11:0] visual_pixels;
+
     visual v(.clk(clk_65mhz), .pvsync(pvsync_vis), .phsync(phsync_vis), .pblank(pblank_vis),
-            .ready_start(sw[15]), .speed(speed),
+            .ready_start(start), .speed(speed),
             .vcount(vcount), .hcount(hcount), .hsync(hsync), .vsync(vsync), .blank(blank),
             .visual_pixels(visual_pixels));
     reg b,hs,vs;
     reg [11:0] rgb;
     always_ff @(posedge clk_65mhz) begin
          // default: pong
-         if (sw[15]) begin 
+         if (start) begin 
             hs <= phsync_vis;
             vs <= pvsync_vis;
             b <= pblank_vis;
@@ -75,6 +99,7 @@ module top_level(
     assign vga_hs = ~hs;
     assign vga_vs = ~vs;
     
+
     wire [31:0] data_display;      //  instantiate 7-segment display; display (8) 4-bit hex
     wire [6:0] segments;
     assign {cg, cf, ce, cd, cc, cb, ca} = segments[6:0];
@@ -89,6 +114,17 @@ module top_level(
 //                            3'b00,out_data[2],
 //                            3'b00,out_data[1],
 //                            3'b00,out_data[0]}; 
-    assign data_display = {20'b0, rgb};
+//    assign data_display = {20'b0, rgb};
+
+
+    // audio integration 
+    top_level_audio audio(.clk(clk_100mhz), .clk_25mhz(clk_25mhz), .start(start), .reset(reset), .sd_cd(sd_cd), // start from selector?
+                            .selection(sw[1:0]), .sd_dat(sd_dat), .sd_reset(sd_reset), .sd_sck(sd_sck),
+                            .sd_cmd(sd_cmd), .aud_sd(aud_sd), .aud_pwm(aud_pwm));
+    // game integration
+    //logic [31:0] game_score;
+    //top_level_game game(.clk(clk_100mhz), .reset(reset), .start(start), .ca(ca), .cb(cb), .cc(cc), .cd(cd), .ce(ce), .cf(cf), .cg(cg), .an(an));
+                            
+    
     
 endmodule
