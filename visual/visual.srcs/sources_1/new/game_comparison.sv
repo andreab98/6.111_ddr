@@ -28,7 +28,6 @@ module game_comparison(input clk,
                        output logic score_ready, 
                        output logic correct
     );
-    
     always_ff @(posedge clk) begin 
         if (ready_in) begin 
             correct <= (intersection_data == correct_data); 

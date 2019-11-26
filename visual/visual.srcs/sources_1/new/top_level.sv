@@ -38,6 +38,7 @@ module top_level(
     
     logic reset; 
     logic start;
+    
     //debounce button inputs 
     debounce deb_start(.clock_in(clk_100mhz), .noisy_in(btnc), .clean_out(start));
     debounce deb_reset(.clock_in(clk_100mhz), .noisy_in(btnr), .clean_out(reset));   
@@ -54,9 +55,10 @@ module top_level(
     reg[3:0] speed;
     wire [11:0] menu_pixels;
     wire phsync_m,pvsync_m,pblank_m;
+    logic game_ready;
     selector select(.clk(clk_65mhz), .hcount(hcount),.vcount(vcount),
                     .hsync(hsync), .vsync(vsync), .blank(blank),
-                    .level(sw[1:0]),.start(start),
+                    .level(sw[1:0]),.start(start),.game_ready(game_ready),
                     .speed(speed),.menu_pixels(menu_pixels),
                     .phsync_out(phsync_m),.pvsync_out(pvsync_m),.pblank_out(pblank_m));
     
@@ -71,14 +73,14 @@ module top_level(
     wire[11:0] visual_pixels;
 
     visual v(.clk(clk_65mhz), .pvsync(pvsync_vis), .phsync(phsync_vis), .pblank(pblank_vis),
-            .ready_start(start), .speed(speed),
+            .ready_start(game_ready), .speed(speed), .sensor_data(out_data),
             .vcount(vcount), .hcount(hcount), .hsync(hsync), .vsync(vsync), .blank(blank),
             .visual_pixels(visual_pixels));
     reg b,hs,vs;
     reg [11:0] rgb;
     always_ff @(posedge clk_65mhz) begin
          // default: pong
-         if (start) begin 
+         if (game_ready) begin 
             hs <= phsync_vis;
             vs <= pvsync_vis;
             b <= pblank_vis;
@@ -106,14 +108,16 @@ module top_level(
     display_8hex hex8(.clk_in(clk_65mhz),.data_in(data_display), .seg_out(segments), .strobe_out(an));
     
 
-//    assign data_display = {3'b00,out_data[8],
-//                            3'b00,out_data[7],
-//                            3'b00,out_data[6],
-//                            3'b00,out_data[5],
-//                            3'b00,out_data[3],
-//                            3'b00,out_data[2],
-//                            3'b00,out_data[1],
-//                            3'b00,out_data[0]}; 
+    assign data_display = {3'b00,out_data[8],
+                            3'b00,out_data[7],
+                            3'b00,out_data[6],
+                            3'b00,out_data[5],
+                            3'b00,out_data[3],
+                            3'b00,out_data[2],
+                            3'b00,out_data[1],
+                            3'b00,out_data[0]}; 
+
+//    assign data_display = {speed, 24'b0, 3'b0,game_ready};
 
 
 
@@ -122,9 +126,9 @@ module top_level(
                             .selection(sw[1:0]), .sd_dat(sd_dat), .sd_reset(sd_reset), .sd_sck(sd_sck),
                             .sd_cmd(sd_cmd), .aud_sd(aud_sd), .aud_pwm(aud_pwm));
     // game integration
-    logic [31:0] game_score;
-    top_level_game game(.clk(clk_100mhz), .reset(reset), .start(start), .score(game_score));
+//    logic [31:0] game_score;
+//    top_level_game game(.clk(clk_100mhz), .reset(reset), .start(start), .score(game_score));
                             
-    assign data_display = game_score; 
+//    assign data_display = game_score; 
     
 endmodule

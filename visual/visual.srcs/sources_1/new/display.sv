@@ -13,13 +13,12 @@ module display (
    input vsync_in,         // XVGA vertical sync signal (active low)
    input blank_in,         // XVGA blanking (1 means output black pixel)
    
+   input[8:0] sensor_data,
    input reset,
    input[3:0] speed,
    input ready_start,
    input[19:0] wait_time, 
       
-   output [8:0] correct_data,
-   output ready_check, // send once the arrows reach the top
    output game_over, //game over signal
         
    output phsync_out,
@@ -45,7 +44,6 @@ module display (
     logic[10:0] SE_arrow_x = 11'd738; 
     logic[10:0] SW_arrow_x = 11'd861; 
     
-    logic check;
     logic done;
     
     logic[11:0] color =  12'hFFF;
@@ -58,7 +56,7 @@ module display (
     // calculate rom address and read the location
     assign image_addr = image;
    
-    choreo  steps(.clka(vsync_in), .addra(image_addr), .douta(image_bits));
+    choreo steps(.clka(vsync_in), .addra(image_addr), .douta(image_bits));
        
     parameter IDLE = 0;
     parameter MOVING_UP = 1;
@@ -67,11 +65,17 @@ module display (
     parameter CHECK = 4;
     parameter READ_DATA =5;
     parameter GET_DATA =6;
-    
+    parameter COLOR_CHECK = 7;
+        
     // max number of choreo steps 
     parameter MAX_NUM = 5;
     
     logic nw,n,ne,e,se,s,sw,w;
+    logic[8:0] correct_data;
+    logic ready_in;
+    logic correct;
+    game_comparison compare(.clk(vclock_in), .correct_data(correct_data), 
+                    .intersection_data(sensor_data),.ready_in(ready_in),.correct(correct));
     
     reg[3:0] state = 0;
     always_ff @(posedge vsync_in) begin
@@ -102,10 +106,16 @@ module display (
                 if (y<=20) state<= CHECK;
             end
             CHECK: begin 
-               check <= 1; 
-               color <= 12'h0F0;
-		       state <= READ_DATA;
+               ready_in <= 1; 
+               correct_data <= image_bits;
+               state <= COLOR_CHECK;
 		       y <= Y_INIT;
+            end
+            COLOR_CHECK: begin 
+                if (correct) color <= 12'h0F0;
+                else color <= 12'hF00;
+                state<=READ_DATA;
+                ready_in <= 0;
             end
             GAME_OVER: begin 
                 
@@ -144,7 +154,6 @@ module display (
                         .color(color),.pixel_out(finish_line));
     
     
-    assign ready_check = check;
     assign game_over = done;
     assign arrow_pixels = finish_line + n_pixels + w_pixels + s_pixels +e_pixels;
     

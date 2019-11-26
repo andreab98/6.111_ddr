@@ -23,7 +23,6 @@ module sensor(
     
     assign test_sensors = {clean_0, clean_1,clean_2,clean_3,clean_4,clean_5};
     
-//    reg[8:0] out_data;
     overlap o(.clk(clk), .clean_0(clean_0),.clean_1(clean_1), .clean_2(clean_2),
                 .clean_3(clean_3), .clean_4(clean_4), .clean_5(clean_5),
                 .intersection_data(out_data));
