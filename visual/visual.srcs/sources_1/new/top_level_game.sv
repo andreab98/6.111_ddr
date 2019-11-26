@@ -24,14 +24,18 @@ module top_level_game(input clk, // system clock
                       input reset, // system reset
                       input start, // games start (might not need this)
                       
+                      input [8:0] intersection_data,
+                      input [8:0] correct_data,
+                      input ready_in,
+                      
                       output logic [31:0] score
                        
     );
     
     //Comparison Module Inputs
-    logic [8:0] correct_data; // data stored in memory (COMES FROM VISUAL MODULE)
-    logic [8:0] intersection_data; // data from sensors -- player's actions (COMES FROM SENSOR MODULE)
-    logic ready_in; // HIGH when arrow passes threshold on screen (COMES FROM VISUAL MODULE)
+//    logic [8:0] correct_data; // data stored in memory (COMES FROM VISUAL MODULE)
+//    logic [8:0] intersection_data; // data from sensors -- player's actions (COMES FROM SENSOR MODULE)
+//    logic ready_in; // HIGH when arrow passes threshold on screen (COMES FROM VISUAL MODULE)
     
     //Comparison Module Outputs
     logic score_ready; // HIGH when comparison made 

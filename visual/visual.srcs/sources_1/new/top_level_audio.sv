@@ -37,17 +37,7 @@ module top_level_audio(input clk,
                        output logic aud_pwm
     );
     
-    // debounce buttons 
-//    logic reset; 
-//    logic start;
-   
-//    debounce deb_start(.clock_in(clk_100mhz), .noisy_in(btnc), .clean_out(start));
-//    debounce deb_reset(.clock_in(clk_100mhz), .noisy_in(btnr), .clean_out(reset));
-    
-    // must read from SD card on 25MHz clock
-//    logic clk_25mhz;
-//    clk_wiz_0 sd_clock(.clk_in1(clk), .clk_out1(clk_25mhz));
-   
+
     
     // assign set outputs 
     assign aud_sd = 1; 
@@ -61,10 +51,10 @@ module top_level_audio(input clk,
     parameter WAVING_START_ADDR = 32'hE53000; // Waving Through a Window 
     
     always_comb begin
-        if (selection[1:0] == 2'b00) begin 
+        if (selection[1:0] == 2'b01) begin 
             addr_0 = MORE_START_ADDR;
         end 
-        else if (selection[1:0] == 2'b01) begin 
+        else if (selection[1:0] == 2'b10) begin 
             addr_0 = WAVING_START_ADDR;
         end 
     end 
@@ -145,10 +135,8 @@ module top_level_audio(input clk,
                 end                 
             end 
             READ: begin
-                if ((selection[1:0] == 2'b00 && sample_counter >= MORE_SAMPLES) 
-                     || (selection[1:0] == 2'b01 && sample_counter >= WAVING_SAMPLES)) begin // when the song is over... game also over
-                     
-                    led[15] <= 1;
+                if ((selection[1:0] == 2'b01 && sample_counter >= MORE_SAMPLES) 
+                     || (selection[1:0] == 2'b10 && sample_counter >= WAVING_SAMPLES)) begin // when the song is over... game also over
                     
                     //reset counters
                     sample_counter <= 0; 

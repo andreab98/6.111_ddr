@@ -126,8 +126,10 @@ module top_level(
                             .selection(sw[1:0]), .sd_dat(sd_dat), .sd_reset(sd_reset), .sd_sck(sd_sck),
                             .sd_cmd(sd_cmd), .aud_sd(aud_sd), .aud_pwm(aud_pwm));
     // game integration
+
 //    logic [31:0] game_score;
 //    top_level_game game(.clk(clk_100mhz), .reset(reset), .start(start), .score(game_score));
+
                             
 //    assign data_display = game_score; 
     
