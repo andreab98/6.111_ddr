@@ -24,8 +24,7 @@ module top_level_game(input clk, // system clock
                       input reset, // system reset
                       input start, // games start (might not need this)
                       
-                      output ca, cb, cc, cd, ce, cf, cg,  // segments a-g
-                      output[7:0] an    // Display location 0-7
+                      output logic [31:0] score
                        
     );
     
@@ -47,10 +46,9 @@ module top_level_game(input clk, // system clock
     logic game_over; // HIGH when the game is over (COMES FROM VISUAL MODULE)
     
     //Score FSM Output
-    logic [31:0] score;
     score_fsm update_score(.clk(clk), .start(start), .rst_in(reset), .game_over(game_over), 
                            .score_ready(score_ready), .correct(correct),
                            .updated_score(score));
     
-    display_8hex score_display(.clk_in(clk), .data_in(score), .seg_out({cg, cf, ce, cd, cc, cb, ca}), .strobe_out(an));
+    
 endmodule

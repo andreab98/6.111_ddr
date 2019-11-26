@@ -114,7 +114,7 @@ module top_level(
 //                            3'b00,out_data[2],
 //                            3'b00,out_data[1],
 //                            3'b00,out_data[0]}; 
-//    assign data_display = {20'b0, rgb};
+
 
 
     // audio integration 
@@ -122,9 +122,9 @@ module top_level(
                             .selection(sw[1:0]), .sd_dat(sd_dat), .sd_reset(sd_reset), .sd_sck(sd_sck),
                             .sd_cmd(sd_cmd), .aud_sd(aud_sd), .aud_pwm(aud_pwm));
     // game integration
-    //logic [31:0] game_score;
-    //top_level_game game(.clk(clk_100mhz), .reset(reset), .start(start), .ca(ca), .cb(cb), .cc(cc), .cd(cd), .ce(ce), .cf(cf), .cg(cg), .an(an));
+    logic [31:0] game_score;
+    top_level_game game(.clk(clk_100mhz), .reset(reset), .start(start), .score(game_score));
                             
-    
+    assign data_display = game_score; 
     
 endmodule
