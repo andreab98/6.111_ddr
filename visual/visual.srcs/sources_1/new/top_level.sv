@@ -4,6 +4,7 @@ module top_level(
    input clk_100mhz,
    input btnc, // start signal
    input btnr, // system reset
+   input btnl, // system pause
    input sd_cd, // sd card input
    
    input[15:0] sw,
@@ -38,10 +39,12 @@ module top_level(
     
     logic reset; 
     logic start;
+    logic pause;
     
     //debounce button inputs 
     debounce deb_start(.clock_in(clk_100mhz), .noisy_in(btnc), .clean_out(start));
     debounce deb_reset(.clock_in(clk_100mhz), .noisy_in(btnr), .clean_out(reset));   
+    debounce deb_pause(.clock_in(clk_100mhz), .noisy_in(btnl), .clean_out(pause));
     
     //xvga for selector and visual modules
     wire [10:0] hcount;    // pixel on current line
@@ -122,7 +125,7 @@ module top_level(
 
 
     // audio integration 
-    top_level_audio audio(.clk(clk_100mhz), .clk_25mhz(clk_25mhz), .start(start), .reset(reset), .sd_cd(sd_cd), // start from selector?
+    top_level_audio audio(.clk(clk_100mhz), .clk_25mhz(clk_25mhz), .start(start), .reset(reset), .pause(pause),.sd_cd(sd_cd), // start from selector?
                             .selection(sw[1:0]), .sd_dat(sd_dat), .sd_reset(sd_reset), .sd_sck(sd_sck),
                             .sd_cmd(sd_cmd), .aud_sd(aud_sd), .aud_pwm(aud_pwm));
     // game integration
