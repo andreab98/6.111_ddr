@@ -4,6 +4,7 @@ module top_level(
    input clk_100mhz,
    input btnc, // start signal
    input btnr, // system reset
+   input btnl, // system pause
    input sd_cd, // sd card input
    
    input[15:0] sw,
@@ -38,10 +39,13 @@ module top_level(
     
     logic reset; 
     logic start;
+    logic pause;
     
     //debounce button inputs 
     debounce deb_start(.clock_in(clk_100mhz), .noisy_in(btnc), .clean_out(start));
     debounce deb_reset(.clock_in(clk_100mhz), .noisy_in(btnr), .clean_out(reset));   
+    debounce deb_pause(.clock_in(clk_100mhz), .noisy_in(btnl), .clean_out(pause));   
+
     
     //xvga for selector and visual modules
     wire [10:0] hcount;    // pixel on current line
@@ -52,13 +56,13 @@ module top_level(
           .hsync_out(hsync),.vsync_out(vsync),.blank_out(blank));
     
     //selector integration
-    reg[3:0] speed;
+    reg[4:0] speed;
     wire [11:0] menu_pixels;
     wire phsync_m,pvsync_m,pblank_m;
     logic game_ready;
     selector select(.clk(clk_65mhz), .hcount(hcount),.vcount(vcount),
                     .hsync(hsync), .vsync(vsync), .blank(blank),
-                    .level(sw[1:0]),.start(start),.game_ready(game_ready),
+                    .level(sw[1:0]),.start(start),.game_ready(game_ready),.reset(reset),
                     .speed(speed),.menu_pixels(menu_pixels),
                     .phsync_out(phsync_m),.pvsync_out(pvsync_m),.pblank_out(pblank_m));
     
@@ -71,15 +75,17 @@ module top_level(
     //visual integration
     wire phsync_vis,pvsync_vis,pblank_vis;
     wire[11:0] visual_pixels;
-
+    wire [4:0] stateout;
+    wire[15:0] i;
+    wire game_over;
     visual v(.clk(clk_65mhz), .pvsync(pvsync_vis), .phsync(phsync_vis), .pblank(pblank_vis),
-            .ready_start(game_ready), .speed(speed), .sensor_data(out_data),
+            .ready_start(game_ready), .speed(speed), .sensor_data(out_data),.start(start),
+            .reset(reset), .pause(pause), .state_out(stateout), .i(i), .game_over(game_over),
             .vcount(vcount), .hcount(hcount), .hsync(hsync), .vsync(vsync), .blank(blank),
-            .visual_pixels(visual_pixels));
+            .arrow_pixels(visual_pixels));
     reg b,hs,vs;
     reg [11:0] rgb;
     always_ff @(posedge clk_65mhz) begin
-         // default: pong
          if (game_ready) begin 
             hs <= phsync_vis;
             vs <= pvsync_vis;
@@ -108,16 +114,16 @@ module top_level(
     display_8hex hex8(.clk_in(clk_65mhz),.data_in(data_display), .seg_out(segments), .strobe_out(an));
     
 
-    assign data_display = {3'b00,out_data[8],
-                            3'b00,out_data[7],
-                            3'b00,out_data[6],
-                            3'b00,out_data[5],
-                            3'b00,out_data[3],
-                            3'b00,out_data[2],
-                            3'b00,out_data[1],
-                            3'b00,out_data[0]}; 
+//    assign data_display = {3'b00,out_data[8],
+//                            3'b00,out_data[7],
+//                            3'b00,out_data[6],
+//                            3'b00,out_data[5],
+//                            3'b00,out_data[3],
+//                            3'b00,out_data[2],
+//                            3'b00,out_data[1],
+//                            3'b00,out_data[0]}; 
 
-//    assign data_display = {speed, 24'b0, 3'b0,game_ready};
+    assign data_display = {speed, 3'b0, i, stateout[3:0], 3'b0,game_ready};
 
 
 

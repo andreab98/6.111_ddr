@@ -7,12 +7,14 @@ module selector(
         input[9:0] vcount,
         input hsync,vsync,blank,
         
+        input reset,
+        
         output phsync_out,
         output pvsync_out,    
         output pblank_out, 
                     
         output [11:0] menu_pixels,
-        output [3:0] speed,
+        output [4:0] speed,
         output game_ready  
     );
     
@@ -29,33 +31,42 @@ module selector(
     parameter SPEED_3 = 16;
     
     logic game_start = 0;
-    logic[3:0] s;
+    logic[4:0] s;
     
-    reg[2:0] state= 0;
+    reg[3:0] state= 0;
     
     parameter IDLE = 0;
     parameter LEVEL_CHOOSE = 1;
     parameter DONE = 2;
+    parameter RESET = 3;
+    
     always_ff @(posedge clk) begin 
-        case (state)
-            IDLE: if(start) state<=LEVEL_CHOOSE;
-            
-            LEVEL_CHOOSE: begin
-                case (level) 
-                    LEVEL_1:begin
-                        s <= SPEED_1;
-                    end
-                    LEVEL_2: begin 
-                        s <= SPEED_2;
-                    end
-                    LEVEL_3:begin
-                        s<= SPEED_3;
-                    end
-                endcase
-                state<=DONE;
-            end
-            DONE: game_start<=1;
-        endcase
+        if (reset) begin
+            state<=RESET;
+        end else begin
+            case (state)
+                IDLE: if(start) state<=LEVEL_CHOOSE;
+                RESET: begin 
+                    game_start<=0;
+                    state<=IDLE;
+                end
+                LEVEL_CHOOSE: begin
+                    case (level) 
+                        LEVEL_1:begin
+                            s <= SPEED_1;
+                        end
+                        LEVEL_2: begin 
+                            s <= SPEED_2;
+                        end
+                        LEVEL_3:begin
+                            s<= SPEED_3;
+                        end
+                    endcase
+                    state<=DONE;
+                end
+                DONE: game_start<=1;
+            endcase
+        end
     end
     
     assign speed = s;
