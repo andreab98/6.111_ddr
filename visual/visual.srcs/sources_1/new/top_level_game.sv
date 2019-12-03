@@ -1,32 +1,14 @@
 `timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
-// Create Date: 11/17/2019 04:47:01 PM
-// Design Name: 
-// Module Name: top_level_game
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
-//////////////////////////////////////////////////////////////////////////////////
-
 
 module top_level_game(input clk, // system clock
                       input reset, // system reset
                       input start, // games start (might not need this)
                       
-                      input [8:0] intersection_data,
+                      input [8:0] sensor_data,
                       input [8:0] correct_data,
                       input ready_in,
+                      
+                      output logic correct,
                       
                       output logic [31:0] score
                        
@@ -39,12 +21,10 @@ module top_level_game(input clk, // system clock
     
     //Comparison Module Outputs
     logic score_ready; // HIGH when comparison made 
-    logic correct; // HIGH when the player stepped correctly
     
+    game_comparison compare(.clk(clk), .correct_data(correct_data), .score_ready(score_ready),
+                    .intersection_data(sensor_data),.ready_in(ready_in),.correct(correct));
     
-    game_comparison compare(.clk(clk), .correct_data(correct_data), 
-                            .intersection_data(intersection_data), .ready_in(ready_in),
-                            .score_ready(score_ready), .correct(correct));
                             
     // Score FSM Inputs (score_ready and correct come from game_comparison)
     logic game_over; // HIGH when the game is over (COMES FROM VISUAL MODULE)

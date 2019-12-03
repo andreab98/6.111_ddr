@@ -15,15 +15,15 @@ module visual (
    input blank,         // XVGA blanking (1 means output black pixel)
    
    input[8:0] sensor_data,
-   input reset,
-   input pause,
-   input start,
+   input reset, pause, start,
    input[4:0] speed,
    input ready_start,
-      
+   
+   input correct,
+   output logic [8:0] correct_data,
+   output logic ready_in,   
+   
    output game_over, //game over signal
-   output [4:0] state_out,
-   output [15:0] i,
    
    output phsync,
    output pvsync,    
@@ -72,14 +72,9 @@ module visual (
     parameter PAUSE = 8;
         
     // max number of choreo steps 
-    parameter MAX_NUM = 500;
+    parameter MAX_NUM = 4;
     
     logic nw,n,ne,e,se,s,sw,w;
-    logic[8:0] correct_data;
-    logic ready_in;
-    logic correct;
-    game_comparison compare(.clk(clk), .correct_data(correct_data), 
-                    .intersection_data(sensor_data),.ready_in(ready_in),.correct(correct));
     
     logic prev_pause = 0;
     
@@ -94,9 +89,8 @@ module visual (
                 end
                 RESET: begin 
                     image <= 0; // reset image address
-                    color <= 12'hFFF; //reset back to white
+//                    color <= 12'hFFF; //reset back to white
                     y <= Y_INIT;
-                    done <= 1;
                     state<=IDLE;
                 end
                 PAUSE: begin
@@ -104,6 +98,7 @@ module visual (
                     if (pause && (!prev_pause)) state<=MOVING_UP; //game paused
                 end
                 READ_DATA: begin 
+                   ready_in <= 0;
                    if (image==MAX_NUM) begin 
                         state<= RESET;
                         done<=1;
@@ -178,8 +173,6 @@ module visual (
     
     
     assign game_over = done;
-    assign i = image;
-    assign state_out = state;
     assign arrow_pixels = finish_line + n_pixels + w_pixels + s_pixels +e_pixels;
     
 endmodule
