@@ -14,13 +14,13 @@ module visual (
    input vsync,         // XVGA vertical sync signal (active low)
    input blank,         // XVGA blanking (1 means output black pixel)
    
-   input[8:0] sensor_data,
+   input[4:0] sensor_data,
    input reset, pause, start,
    input[4:0] speed,
    input ready_start,
    
    input correct,
-   output logic [8:0] correct_data,
+   output logic [4:0] correct_data,
    output logic ready_in,   
    
    output game_over, //game over signal
@@ -43,10 +43,6 @@ module visual (
     logic[10:0] S_arrow_x = 11'd123; 
     logic[10:0] W_arrow_x = 11'd246; 
     logic[10:0] E_arrow_x = 11'd369; 
-    logic[10:0] NE_arrow_x = 11'd492; 
-    logic[10:0] NW_arrow_x = 11'd615; 
-    logic[10:0] SE_arrow_x = 11'd738; 
-    logic[10:0] SW_arrow_x = 11'd861; 
     
     logic done = 0;
     
@@ -54,11 +50,13 @@ module visual (
         
     // read new choreo line 
     logic [15:0] image = 0;   
-    logic [8:0] image_bits;
+    logic [4:0] image_bits;
    
     logic[15:0] image_addr;
     // calculate rom address and read the location
     assign image_addr = image;
+    
+    logic [4:0] prev_image = 0;
    
     choreo steps(.clka(vsync), .addra(image_addr), .douta(image_bits));
        
@@ -74,7 +72,7 @@ module visual (
     // max number of choreo steps 
     parameter MAX_NUM = 4;
     
-    logic nw,n,ne,e,se,s,sw,w;
+    logic n,e,s,w;
     
     logic prev_pause = 0;
     
@@ -85,19 +83,25 @@ module visual (
         end else begin
             case(state)  
                 IDLE: begin 
-                   if (ready_start) state<= READ_DATA;
+                   if (ready_start) begin 
+                    state<= READ_DATA;
+                    ready_in <= 0;
+                   end
                 end
                 RESET: begin 
                     image <= 0; // reset image address
-//                    color <= 12'hFFF; //reset back to white
+                    color <= 12'hFFF; //reset back to white
                     y <= Y_INIT;
                     state<=IDLE;
+                    ready_in <= 0;
                 end
                 PAUSE: begin
+                    ready_in <= 0;
                     prev_pause <= pause;
                     if (pause && (!prev_pause)) state<=MOVING_UP; //game paused
                 end
                 READ_DATA: begin 
+                   prev_image <= image_bits;
                    ready_in <= 0;
                    if (image==MAX_NUM) begin 
                         state<= RESET;
@@ -109,33 +113,31 @@ module visual (
                    end
                 end
                 GET_DATA: begin 
-                    nw <= image_bits[0]; //A NW 
-                    n <= image_bits[1]; //b N
-                    ne <= image_bits[2]; //C NE
+                    n <= image_bits[4]; //b N
                     w <= image_bits[3]; //D W
-                    e <= image_bits[5]; //F E
-                    sw <= image_bits[6]; //G SW
-                    s <= image_bits[7]; //H S
-                    se <= image_bits[8]; //I SE       
-                    state<=MOVING_UP;   
+                    e <= image_bits[1]; //F E
+                    s <= image_bits[0]; //H S
+                    state<=MOVING_UP; 
+                    ready_in <= 0;  
                 end
                  MOVING_UP: begin
+                    ready_in <= 0;
                     y <= y - speed;
-                    if (y<=20) state<= CHECK;
+                    if (y<=46) state<= CHECK;
                     prev_pause <= pause;
                     if (pause && (!prev_pause)) state<=PAUSE; //game paused
                 end
                 CHECK: begin 
                    ready_in <= 1; 
-                   correct_data <= image_bits;
+                   correct_data <= prev_image;
                    state <= COLOR_CHECK;
                    y <= Y_INIT;
                 end
                 COLOR_CHECK: begin 
+                    ready_in <= 0;
                     if (correct) color <= 12'h0F0;
                     else color <= 12'hF00;
                     state<=READ_DATA;
-                    ready_in <= 0;
                 end
                 default: state <= IDLE;
             endcase
@@ -168,9 +170,11 @@ module visual (
                             
     // finish line code
     wire[11:0] finish_line;
-    finish_blob finish(.x_in(0),.hcount_in(hcount),.y_in(0),.vcount_in(vcount),
+    finish_blob finish(.x_in(0),.hcount_in(hcount),.y_in(42),.vcount_in(vcount),
                         .color(color),.pixel_out(finish_line));
     
+    ila_0 ila (.clk(clk), .probe0(state), .probe1(sensor_data[4:0]),.probe2(correct_data[4:0]),.probe3(ready_in),
+                .probe4(correct),.probe5(0), .probe6(0), .probe7(0));
     
     assign game_over = done;
     assign arrow_pixels = finish_line + n_pixels + w_pixels + s_pixels +e_pixels;

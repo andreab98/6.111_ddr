@@ -7,17 +7,17 @@ module score_fsm(input clk,
                  input score_ready, 
                  input correct,
                  
-                 output logic [31:0] updated_score
+                 output[31:0] updated_score
     );
 
     // states for different increments  
-    parameter IDLE = 2'b01;
-    parameter INCREMENT = 2'b10;
-    logic [1:0] state = IDLE; 
+    parameter IDLE = 0;
+    parameter INCREMENT = 1;
+    reg [1:0] state = 0; 
     
     
     // initialize the score 
-    logic [31:0] score = 0;
+    reg [31:0] score = 0;
     assign updated_score = score;
     
     always_ff @(posedge clk) begin 
@@ -33,13 +33,11 @@ module score_fsm(input clk,
                 end 
             end
             INCREMENT: begin
-                if (game_over) begin 
-                    state <= IDLE;
-                end 
-                
-                else begin
-                score <= score + (score_ready && correct);  // increment score by 1
-                end 
+                if (score_ready && correct) score<= (score + 1'b1);
+//                if (game_over) state <= IDLE;
+//                else begin
+//                    score <= (score + (score_ready && correct));  // increment score by 1
+//                end 
                 
             end   
         endcase
