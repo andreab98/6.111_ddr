@@ -18,6 +18,7 @@ module visual (
    input reset, pause, start,
    input[4:0] speed,
    input ready_start,
+   input [31:0] score,
    
    input correct,
    output logic [8:0] correct_data,
@@ -43,10 +44,9 @@ module visual (
     logic[10:0] S_arrow_x = 11'd123; 
     logic[10:0] W_arrow_x = 11'd246; 
     logic[10:0] E_arrow_x = 11'd369; 
-    logic[10:0] NE_arrow_x = 11'd492; 
-    logic[10:0] NW_arrow_x = 11'd615; 
-    logic[10:0] SE_arrow_x = 11'd738; 
-    logic[10:0] SW_arrow_x = 11'd861; 
+    logic [10:0] score_1_x = 11'd615; 
+    logic [10:0] score_2_x = 11'd738; 
+    logic [10:0] score_3_x = 11'd861;
     
     logic done = 0;
     
@@ -142,6 +142,23 @@ module visual (
         end
     end
     
+    parameter score_height = 100; 
+    
+    wire [11:0] score_pixels_1;
+    score_blob_1 score1(.pixel_clk_in(clk), .x_in(score_1_x), .y_in(score_height), 
+                     .hcount_in(hcount), .vcount_in(vcount), 
+                     .pixel_out(score_pixels_1), .on());
+    
+    wire [11:0] score_pixels_2;
+    score_blob_2 score2(.pixel_clk_in(clk), .x_in(score_2_x), .y_in(score_height), 
+                     .hcount_in(hcount), .vcount_in(vcount), 
+                     .pixel_out(score_pixels_2), .on());
+                      
+    wire [11:0] score_pixels_3;
+    score_blob_3 score3(.pixel_clk_in(clk), .x_in(score_3_x), .y_in(score_height), 
+                     .hcount_in(hcount), .vcount_in(vcount), 
+                     .pixel_out(score_pixels_3), .on());
+                     
     // up arrow code
     wire [11:0] n_pixels;
     N_arrow_blob up(.pixel_clk_in(clk),.x_in(N_arrow_x),.y_in(y),
@@ -173,7 +190,7 @@ module visual (
     
     
     assign game_over = done;
-    assign arrow_pixels = finish_line + n_pixels + w_pixels + s_pixels +e_pixels;
+    assign arrow_pixels = finish_line + n_pixels + w_pixels + s_pixels +e_pixels + score_pixels_1 + score_pixels_2 + score_pixels_3;
     
 endmodule
 

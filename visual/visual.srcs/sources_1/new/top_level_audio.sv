@@ -38,9 +38,6 @@ module top_level_audio(input clk,
                        output logic aud_pwm
     );
     
-
-    
-    // assign set outputs 
     assign aud_sd = 1; 
     assign sd_dat[2] = 1;
     assign sd_dat[1] = 1; 
@@ -48,8 +45,9 @@ module top_level_audio(input clk,
     
     // set initial address based on selected song 
     logic [31:0] addr_0;
-    parameter MORE_START_ADDR = 32'd0; // More by Usher
-    parameter WAVING_START_ADDR = 32'hE53000; // Waving Through a Window 
+    parameter MORE_START_ADDR = 32'h3E00; // More by Usher
+    parameter WAVING_START_ADDR = 32'hE56E00; // Waving Through a Window 
+    parameter DONT_START_ADDR = 32'h1CA9400; // Don't Stop Me Now
     
     always_comb begin
         if (selection[1:0] == 2'b01) begin 
@@ -57,6 +55,9 @@ module top_level_audio(input clk,
         end 
         else if (selection[1:0] == 2'b10) begin 
             addr_0 = WAVING_START_ADDR;
+        end 
+        else if (selection[1:0] == 2'b11) begin 
+            addr_0 = DONT_START_ADDR;
         end 
     end 
     
@@ -107,10 +108,11 @@ module top_level_audio(input clk,
     logic [15:0] fifo_count = 0;
     parameter FIFO_READ = 1561; // read every 1561 cycles 
     
-    // keep track of the total bytes samples - dictates when to stop playing the song
+    // keep track of the total bytes sampled - dictates when to stop playing the song - MUST UPDATE
     logic [23:0] sample_counter = 0;
     parameter MORE_SAMPLES = 14016000;
     parameter WAVING_SAMPLES = 14660128;
+    parameter DONT_SAMPLES = 13940805;
     
     logic past_pause; 
     
@@ -141,7 +143,8 @@ module top_level_audio(input clk,
             end 
             READ: begin
                 if ((selection[1:0] == 2'b01 && sample_counter >= MORE_SAMPLES) 
-                     || (selection[1:0] == 2'b10 && sample_counter >= WAVING_SAMPLES)) begin // when the song is over... game also over
+                     || (selection[1:0] == 2'b10 && sample_counter >= WAVING_SAMPLES)
+                     || (selection[1:0] == 2'b11 && sample_counter >= DONT_SAMPLES)) begin // when the song is over... game also over
                     
                     //reset counters
                     sample_counter <= 0; 
