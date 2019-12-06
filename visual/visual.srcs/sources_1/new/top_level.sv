@@ -68,8 +68,11 @@ module top_level(
     
     //sensor integration
     wire[5:0] test_sensors;
-    wire[8:0] out_data;
-    sensor s(.clk(clk_65mhz), .jb_sensors(jb[5:0]),.test_sensors(test_sensors), .out_data(out_data));
+    wire[4:0] out_data;
+    // test with switches:
+    sensor s(.clk(clk_65mhz), .jb_sensors(sw[15:10]),.test_sensors(test_sensors), .out_data(out_data));
+
+//    sensor s(.clk(clk_65mhz), .jb_sensors(jb[5:0]),.test_sensors(test_sensors), .out_data(out_data));
     assign led[5:0] = test_sensors;
     
     
@@ -77,15 +80,17 @@ module top_level(
     logic [31:0] game_score;
     wire correct;
     wire ready_in;
-    wire[8:0] correct_data;
+    wire game_over;
+    wire score_ready;
+    wire[4:0] correct_data;
     top_level_game game(.clk(clk_65mhz), .reset(reset), .start(start), 
                         .score(game_score), .sensor_data(out_data), .correct_data(correct_data),
-                        .ready_in(ready_in), .correct(correct));
+                        .i(score_ready),
+                        .game_over(game_over),.ready_in(ready_in), .correct(correct));
     
     //visual integration
     wire phsync_vis,pvsync_vis,pblank_vis;
     wire[11:0] visual_pixels;
-    wire game_over;
     visual v(.clk(clk_65mhz), .pvsync(pvsync_vis), .phsync(phsync_vis), .pblank(pblank_vis),
             .ready_start(game_ready), .speed(speed), .sensor_data(out_data),.start(start),
             .reset(reset), .pause(pause), .game_over(game_over), .score(game_score),
@@ -124,20 +129,20 @@ module top_level(
     display_8hex hex8(.clk_in(clk_65mhz),.data_in(data_display), .seg_out(segments), .strobe_out(an));
     
 
-//    assign data_display = {3'b00,out_data[8],
-//                            3'b00,out_data[7],
-//                            3'b00,out_data[6],
-//                            3'b00,out_data[5],
-//                            3'b00,out_data[3],
+//    assign data_display = {3'b00,out_data[3],
 //                            3'b00,out_data[2],
-//                            3'b00,out_data[1],
-//                            3'b00,out_data[0]}; 
+//                            3'b00,correct_data[3],
+//                            3'b00,correct_data[2],
+//                            4'b00,
+//                            3'b00,score_ready,
+//                            3'b00,correct,
+//                            game_score[3:0]}; 
 
     // audio integration 
     top_level_audio audio(.clk(clk_100mhz), .clk_25mhz(clk_25mhz), .start(start), .pause(pause), .reset(reset), .sd_cd(sd_cd), // start from selector?
                             .selection(sw[1:0]), .sd_dat(sd_dat), .sd_reset(sd_reset), .sd_sck(sd_sck),
                             .sd_cmd(sd_cmd), .aud_sd(aud_sd), .aud_pwm(aud_pwm));
                             
-    assign data_display = {3'b0,ready_in,24'b0 ,game_score[3:0]}; 
+    assign data_display = game_score; 
     
 endmodule
