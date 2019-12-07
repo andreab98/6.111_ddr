@@ -12,12 +12,16 @@ module score_fsm(input clk,
 
     // states for different increments  
     parameter IDLE = 0;
-    parameter INCREMENT = 1;
-    reg [1:0] state = 0; 
+    parameter IS_STREAK = 1;
+    parameter STREAK_INCR = 2;
+    parameter NORM_INCR = 3;
     
+    reg [4:0] state = 0;
     
     // initialize the score 
-    reg [31:0] score = 0;
+    reg[31:0] score = 0;
+    reg[9:0] streak = 0;
+    logic[4:0] prev_correct = 0;
     assign updated_score = score;
     
     always_ff @(posedge clk) begin 
@@ -27,19 +31,34 @@ module score_fsm(input clk,
         end      
         case(state)
             IDLE: begin 
-                if (start) begin 
-                    score <= 0;
-                    state <= INCREMENT;
-                end 
+                score <= 0;
+                streak<= 0;
+                prev_correct<=0;
+                if (start) state <= IS_STREAK;
             end
-            INCREMENT: begin
-                if (score_ready && correct) score<= (score + 1'b1);
-//                if (game_over) state <= IDLE;
-//                else begin
-//                    score <= (score + (score_ready && correct));  // increment score by 1
-//                end 
-                
+            IS_STREAK: begin
+                if (score_ready) begin
+                    prev_correct <= {prev_correct[3:0],correct};
+                    if (prev_correct==5'b11111) state<= STREAK_INCR;
+                    else state<= NORM_INCR;
+                end
             end   
+            STREAK_INCR: begin 
+                if (correct) begin 
+                    score <= score + 2;
+                    streak <= streak + 1;
+                end else begin 
+                    streak<= 0;
+                end
+                state<=IS_STREAK;
+            end     
+            NORM_INCR: begin 
+                streak<= 0;
+                if (correct) begin 
+                    score <= score + 1;
+                end 
+                state<=IS_STREAK;
+            end
         endcase
     end 
 endmodule

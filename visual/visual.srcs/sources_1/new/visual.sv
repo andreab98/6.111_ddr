@@ -170,11 +170,15 @@ module visual (
                             
     // finish line code
     wire[11:0] finish_line;
-    finish_blob finish(.x_in(0),.hcount_in(hcount),.y_in(42),.vcount_in(vcount),
+    rectangle_blob finish(.x_in(0),.hcount_in(hcount),.y_in(42),.vcount_in(vcount),
                         .color(color),.pixel_out(finish_line));
     
-    ila_0 ila (.clk(clk), .probe0(state), .probe1(sensor_data[4:0]),.probe2(correct_data[4:0]),.probe3(ready_in),
-                .probe4(correct),.probe5(0), .probe6(0), .probe7(0));
+    //perfect vs imperfect line;
+    wire[11:0] perfect_line;
+    rectangle_blob perfect(.x_in(0),.hcount_in(hcount),.y_in(42),.vcount_in(vcount),
+                        .color(color),.pixel_out(finish_line));
+//    ila_0 ila (.clk(clk), .probe0(state), .probe1(sensor_data[4:0]),.probe2(correct_data[4:0]),.probe3(ready_in),
+//                .probe4(correct),.probe5(0), .probe6(0), .probe7(0));
     
     assign game_over = done;
     assign arrow_pixels = finish_line + n_pixels + w_pixels + s_pixels +e_pixels;
@@ -186,7 +190,7 @@ endmodule
 // blob: generate rectangle on screen
 //
 //////////////////////////////////////////////////////////////////////
-module finish_blob
+module rectangle_blob
    #(parameter WIDTH = 900,   
                HEIGHT = 8) 
    (input [10:0] x_in,hcount_in,

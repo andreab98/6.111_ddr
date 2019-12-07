@@ -8,8 +8,8 @@ module score_tb;
     logic start = 0;
     logic game_over = 0;
     logic ready_in = 0;
-    logic[8:0] sensor_data;
-    logic[8:0] correct_data;
+    logic[4:0] sensor_data;
+    logic[4:0] correct_data;
        
     //outputs
     logic correct;
@@ -37,6 +37,54 @@ module score_tb;
         start = 1;
         correct_data = 5'b10100;
         sensor_data = 5'b10100;
+        
+        #5
+        ready_in = 1;
+        #5
+        ready_in = 0;
+        
+        #5
+        ready_in = 1;
+        #5
+        ready_in = 0;
+        
+        #5
+        ready_in = 1;
+        #5
+        ready_in = 0;
+        
+        #5
+        ready_in = 1;
+        #5
+        ready_in = 0;
+        
+        #5
+        ready_in = 1;
+        #5
+        ready_in = 0;
+        
+        #5
+        ready_in = 1;
+        #5
+        ready_in = 0;
+        
+        #5
+        ready_in = 1;
+        #5
+        ready_in = 0;
+        
+        #5
+        ready_in = 1;
+        #5
+        ready_in = 0;
+        #5
+        ready_in = 1;
+        #5
+        ready_in = 0;
+        #5
+        ready_in = 1;
+        #5
+        ready_in = 0;
         #5
         ready_in = 1;
         #5
