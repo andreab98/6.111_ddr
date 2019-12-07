@@ -18,6 +18,7 @@ module visual (
    input reset, pause, start,
    input[4:0] speed,
    input ready_start,
+   input [31:0] score,
    
    input correct,
    output logic [4:0] correct_data,
@@ -43,6 +44,10 @@ module visual (
     logic[10:0] S_arrow_x = 11'd123; 
     logic[10:0] W_arrow_x = 11'd246; 
     logic[10:0] E_arrow_x = 11'd369; 
+
+    logic [10:0] score_1_x = 11'd764; 
+    logic [10:0] score_2_x = 11'd832; 
+    logic [10:0] score_3_x = 11'd900;
     
     logic done = 0;
     
@@ -144,6 +149,28 @@ module visual (
         end
     end
     
+    logic [4:0] hundreds;
+    logic [4:0] tens; 
+    logic [4:0] ones;
+    bin_to_dec convert(.number(score), .hundreds(hundreds), .tens(tens), .ones(ones));
+    
+    parameter score_height = 100; 
+    
+    wire [11:0] score_pixels_1;
+    score_blob_1 score1(.pixel_clk_in(clk), .x_in(score_1_x), .y_in(score_height), 
+                     .hcount_in(hcount), .vcount_in(vcount), 
+                     .pixel_out(score_pixels_1), .num(hundreds));
+    
+    wire [11:0] score_pixels_2;
+    score_blob_2 score2(.pixel_clk_in(clk), .x_in(score_2_x), .y_in(score_height), 
+                     .hcount_in(hcount), .vcount_in(vcount), 
+                     .pixel_out(score_pixels_2), .num(tens));
+                      
+    wire [11:0] score_pixels_3;
+    score_blob_3 score3(.pixel_clk_in(clk), .x_in(score_3_x), .y_in(score_height), 
+                     .hcount_in(hcount), .vcount_in(vcount), 
+                     .pixel_out(score_pixels_3), .num(ones));
+                     
     // up arrow code
     wire [11:0] n_pixels;
     N_arrow_blob up(.pixel_clk_in(clk),.x_in(N_arrow_x),.y_in(y),
@@ -173,15 +200,17 @@ module visual (
     rectangle_blob finish(.x_in(0),.hcount_in(hcount),.y_in(42),.vcount_in(vcount),
                         .color(color),.pixel_out(finish_line));
     
+
     //perfect vs imperfect line;
-    wire[11:0] perfect_line;
-    rectangle_blob perfect(.x_in(0),.hcount_in(hcount),.y_in(42),.vcount_in(vcount),
-                        .color(color),.pixel_out(finish_line));
+    //wire[11:0] perfect_line;
+    //rectangle_blob perfect(.x_in(0),.hcount_in(hcount),.y_in(42),.vcount_in(vcount),
+                        //.color(color),.pixel_out(finish_line));
+
 //    ila_0 ila (.clk(clk), .probe0(state), .probe1(sensor_data[4:0]),.probe2(correct_data[4:0]),.probe3(ready_in),
 //                .probe4(correct),.probe5(0), .probe6(0), .probe7(0));
     
     assign game_over = done;
-    assign arrow_pixels = finish_line + n_pixels + w_pixels + s_pixels +e_pixels;
+    assign arrow_pixels = finish_line + n_pixels + w_pixels + s_pixels +e_pixels + score_pixels_1 + score_pixels_2 + score_pixels_3;
     
 endmodule
 

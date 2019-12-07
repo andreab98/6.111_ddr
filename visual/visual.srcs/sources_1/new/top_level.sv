@@ -93,7 +93,7 @@ module top_level(
     wire[11:0] visual_pixels;
     visual v(.clk(clk_65mhz), .pvsync(pvsync_vis), .phsync(phsync_vis), .pblank(pblank_vis),
             .ready_start(game_ready), .speed(speed), .sensor_data(out_data),.start(start),
-            .reset(reset), .pause(pause), .game_over(game_over),
+            .reset(reset), .pause(pause), .game_over(game_over), .score(game_score),
             .correct_data(correct_data), .ready_in(ready_in), .correct(correct),
             .vcount(vcount), .hcount(hcount), .hsync(hsync), .vsync(vsync), .blank(blank),
             .arrow_pixels(visual_pixels));
@@ -139,7 +139,7 @@ module top_level(
 //                            game_score[3:0]}; 
 
     // audio integration 
-    top_level_audio audio(.clk(clk_100mhz), .clk_25mhz(clk_25mhz), .start(start), .reset(reset), .sd_cd(sd_cd), // start from selector?
+    top_level_audio audio(.clk(clk_100mhz), .clk_25mhz(clk_25mhz), .start(start), .pause(pause), .reset(reset), .sd_cd(sd_cd), // start from selector?
                             .selection(sw[1:0]), .sd_dat(sd_dat), .sd_reset(sd_reset), .sd_sck(sd_sck),
                             .sd_cmd(sd_cmd), .aud_sd(aud_sd), .aud_pwm(aud_pwm));
                             
