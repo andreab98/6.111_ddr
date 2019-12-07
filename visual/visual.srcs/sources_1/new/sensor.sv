@@ -9,23 +9,23 @@ module sensor(
 
     // debounce all sensor inputs 
     wire clean_0;
-    assign clean_0 = jb_sensors[0];
-//    debounce d0 (.clock_in(clk), .noisy_in(jb_sensors[0]), .clean_out(clean_0));
+    //assign clean_0 = jb_sensors[0];
+    debounce d0 (.clock_in(clk), .noisy_in(jb_sensors[0]), .clean_out(clean_0));
     wire clean_1;
-    assign clean_1 = jb_sensors[1];
-//    debounce d1 (.clock_in(clk), .noisy_in(jb_sensors[1]), .clean_out(clean_1));
+   // assign clean_1 = jb_sensors[1];
+    debounce d1 (.clock_in(clk), .noisy_in(jb_sensors[1]), .clean_out(clean_1));
     wire clean_2;
-    assign clean_2 = jb_sensors[2];
-//    debounce d2 (.clock_in(clk), .noisy_in(jb_sensors[2]), .clean_out(clean_2));
+   // assign clean_2 = jb_sensors[2];
+    debounce d2 (.clock_in(clk), .noisy_in(jb_sensors[2]), .clean_out(clean_2));
     wire clean_3;
-    assign clean_3 = jb_sensors[3];
-//    debounce d3 (.clock_in(clk), .noisy_in(jb_sensors[3]), .clean_out(clean_3));
+    //assign clean_3 = jb_sensors[3];
+    debounce d3 (.clock_in(clk), .noisy_in(jb_sensors[3]), .clean_out(clean_3));
     wire clean_4;
-    assign clean_4 = jb_sensors[4];
-//    debounce d4 (.clock_in(clk), .noisy_in(jb_sensors[4]), .clean_out(clean_4));   
+    //assign clean_4 = jb_sensors[4];
+    debounce d4 (.clock_in(clk), .noisy_in(jb_sensors[4]), .clean_out(clean_4));   
     wire clean_5;
-    assign clean_5 = jb_sensors[5];
-//    debounce d5 (.clock_in(clk), .noisy_in(jb_sensors[5]), .clean_out(clean_5));
+   // assign clean_5 = jb_sensors[5];
+    debounce d5 (.clock_in(clk), .noisy_in(jb_sensors[5]), .clean_out(clean_5));
     
     assign test_sensors = {clean_0, clean_1,clean_2,clean_3,clean_4,clean_5};
     

@@ -70,9 +70,9 @@ module top_level(
     wire[5:0] test_sensors;
     wire[4:0] out_data;
     // test with switches:
-    sensor s(.clk(clk_65mhz), .jb_sensors(sw[15:10]),.test_sensors(test_sensors), .out_data(out_data));
+    //sensor s(.clk(clk_65mhz), .jb_sensors(sw[15:10]),.test_sensors(test_sensors), .out_data(out_data));
 
-//    sensor s(.clk(clk_65mhz), .jb_sensors(jb[5:0]),.test_sensors(test_sensors), .out_data(out_data));
+    sensor s(.clk(clk_65mhz), .jb_sensors(jb[5:0]),.test_sensors(test_sensors), .out_data(out_data));
     assign led[5:0] = test_sensors;
     
     
