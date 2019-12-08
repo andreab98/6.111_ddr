@@ -6,6 +6,7 @@ module score_fsm(input clk,
                  input game_over, 
                  input score_ready, 
                  input correct,
+                 input perfect,
                  
                  output[31:0] updated_score
     );
@@ -44,19 +45,24 @@ module score_fsm(input clk,
                 end
             end   
             STREAK_INCR: begin 
-                if (correct) begin 
+                if (correct&&perfect) begin 
+                    score <= score + 4;
+                    streak <= streak + 1;
+                end if (correct && (!perfect)) begin 
                     score <= score + 2;
                     streak <= streak + 1;
-                end else begin 
-                    streak<= 0;
-                end
+                end else streak<=0;
                 state<=IS_STREAK;
             end     
             NORM_INCR: begin 
                 streak<= 0;
-                if (correct) begin 
+                
+                if (correct&&perfect) begin 
+                    score <= score + 2;
+                end if (correct && (!perfect)) begin 
                     score <= score + 1;
                 end 
+                
                 state<=IS_STREAK;
             end
         endcase

@@ -82,10 +82,11 @@ module top_level(
     wire ready_in;
     wire game_over;
     wire score_ready;
+    wire perfect;
     wire[4:0] correct_data;
     top_level_game game(.clk(clk_65mhz), .reset(reset), .start(start), 
                         .score(game_score), .sensor_data(out_data), .correct_data(correct_data),
-                        .i(score_ready),
+                        .perfect_check(perfect),
                         .game_over(game_over),.ready_in(ready_in), .correct(correct));
     
     //visual integration
@@ -94,9 +95,12 @@ module top_level(
     visual v(.clk(clk_65mhz), .pvsync(pvsync_vis), .phsync(phsync_vis), .pblank(pblank_vis),
             .ready_start(game_ready), .speed(speed), .sensor_data(out_data),.start(start),
             .reset(reset), .pause(pause), .game_over(game_over), .score(game_score),
-            .correct_data(correct_data), .ready_in(ready_in), .correct(correct),
+            .correct_data(correct_data), .ready_in(ready_in), .correct(correct), .perfect(perfect),
             .vcount(vcount), .hcount(hcount), .hsync(hsync), .vsync(vsync), .blank(blank),
             .arrow_pixels(visual_pixels));
+            
+    ila_0 ila (.clk(clk_65mhz), .probe0(0), .probe1(out_data[4:0]),.probe2(correct_data[4:0]),.probe3(ready_in),
+                .probe4(correct),.probe5(perfect), .probe6(0), .probe7(0));
             
     reg b,hs,vs;
     reg [11:0] rgb;
