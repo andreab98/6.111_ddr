@@ -23,7 +23,7 @@ module score_blob_3
    always @ (posedge pixel_clk_in) begin
      if (((hcount_in >= x_in && hcount_in < (x_in+WIDTH)) && (vcount_in >= y_in && vcount_in < (y_in+HEIGHT))))
         // use MSB 4 bits
-        pixel_out <= 12'hFFF - {red_mapped[7:4], red_mapped[7:4], red_mapped[7:4]}; // greyscale
+        pixel_out <= ~{red_mapped[7:4], red_mapped[7:4], red_mapped[7:4]}; // greyscale
         else pixel_out <= 0;
    end
 

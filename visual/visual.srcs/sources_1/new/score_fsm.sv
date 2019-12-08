@@ -7,6 +7,7 @@ module score_fsm(input clk,
                  input score_ready, 
                  input correct,
                  
+                 output logic streak_out, 
                  output[31:0] updated_score
     );
 
@@ -23,6 +24,9 @@ module score_fsm(input clk,
     reg[9:0] streak = 0;
     logic[4:0] prev_correct = 0;
     assign updated_score = score;
+    
+    assign streak_out = (streak > 0);
+    
     
     always_ff @(posedge clk) begin 
         if (rst_in) begin 

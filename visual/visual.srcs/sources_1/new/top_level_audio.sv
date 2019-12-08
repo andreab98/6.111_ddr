@@ -216,6 +216,6 @@ module top_level_audio(input clk,
     end 
     
     
-    audio_PWM pwm(.clk(clk), .reset(reset), .music_data(data_from_fifo), .PWM_out(aud_pwm));
+    audio_PWM pwm(.clk_in(clk), .rst_in(reset), .level_in(data_from_fifo), .pwm_out(aud_pwm));
     
 endmodule

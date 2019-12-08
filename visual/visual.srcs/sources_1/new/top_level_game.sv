@@ -11,7 +11,7 @@ module top_level_game(input clk, // system clock
                       input ready_in, //HIGH when arrow passes threshold on screen
                       
                       output logic correct,
-                      
+                      output logic streak,
                       output logic [31:0] score,
                       
                       //debugging
@@ -29,7 +29,7 @@ module top_level_game(input clk, // system clock
       
     //Score FSM Output
     score_fsm update_score(.clk(clk), .start(start), .rst_in(reset), .game_over(game_over), 
-                           .score_ready(score_ready), .correct(correct),
+                           .score_ready(score_ready), .streak_out(streak), .correct(correct),
                            .updated_score(score));
     
     assign i = score_ready;
