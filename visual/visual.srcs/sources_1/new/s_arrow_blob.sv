@@ -7,7 +7,8 @@
 //////////////////////////////////////////////////
 module S_arrow_blob
    #(parameter WIDTH = 113,     // default picture width
-               HEIGHT = 113)    // default picture height
+               HEIGHT = 113,
+               HCOUNT_LATENCY = 4)    // default picture height
    (input pixel_clk_in,
     input [10:0] x_in,hcount_in,
     input [9:0] y_in,vcount_in,
@@ -18,7 +19,7 @@ module S_arrow_blob
    logic [7:0] image_bits, red_mapped;
    
    // calculate rom address and read the location
-   assign image_addr = (hcount_in-x_in) + (vcount_in-y_in) * WIDTH;
+   assign image_addr = ((hcount_in + HCOUNT_LATENCY)-x_in) + (vcount_in-y_in) * WIDTH;
    
    S_arrow  south(.clka(pixel_clk_in), .addra(image_addr), .douta(image_bits));
 

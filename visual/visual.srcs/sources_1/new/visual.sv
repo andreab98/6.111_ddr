@@ -31,12 +31,38 @@ module visual (
    output pblank,  
    output [11:0] arrow_pixels 
    );
-
+    
+    parameter Y_INIT = 600;
+    
+    parameter DELAY_SHIFT = 2;
+    
+    logic [3:0] hsync_del_shift;
+    logic [3:0] vsync_del_shift;
+    logic [3:0] blank_del_shift;
+    
+    integer i;
+    
     assign phsync = hsync;
     assign pvsync = vsync;
     assign pblank = blank;
     
-    parameter Y_INIT = 600;
+//    always_ff @(posedge clk) begin
+//        hsync_del_shift[3] <= hsync;
+//        vsync_del_shift[3] <= vsync;
+//        blank_del_shift[3] <= blank;
+        
+//        hsync_del_shift[0] <= hsync_del_shift[1];
+//        vsync_del_shift[0] <= vsync_del_shift[1];
+//        blank_del_shift[0] <= blank_del_shift[1];
+        
+//        hsync_del_shift[1] <= hsync_del_shift[2];
+//        vsync_del_shift[1] <= vsync_del_shift[2];
+//        blank_del_shift[1] <= blank_del_shift[2];
+        
+//        hsync_del_shift[2] <= hsync_del_shift[3];
+//        vsync_del_shift[2] <= vsync_del_shift[3];
+//        blank_del_shift[2] <= blank_del_shift[3];
+//    end
     
     logic[11:0] y = Y_INIT;
     
@@ -203,6 +229,7 @@ module visual (
     rectangle_blob finish(.x_in(0),.hcount_in(hcount),.y_in(42),.vcount_in(vcount),
                         .color(color),.pixel_out(finish_line));
      
+        
     wire [11:0] streak_pixels;
     streak_blob str(.pixel_clk_in(clk),.x_in(streak_x),.y_in(streak_height),
                             .hcount_in(hcount),.vcount_in(vcount),
