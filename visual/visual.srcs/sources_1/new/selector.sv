@@ -26,9 +26,9 @@ module selector(
     parameter LEVEL_2 = 2'b10;
     parameter LEVEL_3 = 2'b11;
     
-    parameter SPEED_1 = 4;
-    parameter SPEED_2 = 8;
-    parameter SPEED_3 = 16;
+    parameter SPEED_1 = 2;
+    parameter SPEED_2 = 4;
+    parameter SPEED_3 = 8;
     
     logic game_start = 0;
     logic[4:0] s;

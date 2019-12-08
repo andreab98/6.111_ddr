@@ -21,6 +21,9 @@ module visual (
    input [31:0] score,
    input streak,    
    input correct,
+   
+   output perfect,
+   
    output logic [4:0] correct_data,
    output logic ready_in,   
    
@@ -71,6 +74,7 @@ module visual (
     logic[10:0] W_arrow_x = 11'd346; 
     logic[10:0] E_arrow_x = 11'd469; 
 
+
     logic [10:0] score_1_x = 11'd764; 
     logic [10:0] score_2_x = 11'd814; 
     logic [10:0] score_3_x = 11'd864;
@@ -96,18 +100,26 @@ module visual (
     parameter IDLE = 0;
     parameter MOVING_UP = 1;
     parameter RESET = 2;
-    parameter CHECK = 4;
-    parameter READ_DATA =5;
-    parameter GET_DATA =6;
-    parameter COLOR_CHECK = 7;
-    parameter PAUSE = 8;
+    parameter READ_DATA =3;
+    parameter GET_DATA =4;
+    parameter COLOR_CHECK = 5;
+    parameter PAUSE = 6;
+    parameter CHECK_PERFECT = 7;
+    parameter CHECK_IMPERFECT = 8;
+    parameter CHECK_WAIT = 9;
+    parameter PERFECT_WAIT = 10;
         
     // max number of choreo steps 
     parameter MAX_NUM = 110;
     
+    parameter Y_PERFECT = 163;
+    parameter Y_MARGIN = 10;
+        
     logic n,e,s,w;
     
     logic prev_pause = 0;
+    logic perfect_curr;
+    logic correct_curr;
     
     reg[4:0] state = 0;
     always_ff @(posedge vsync) begin
@@ -136,9 +148,9 @@ module visual (
                 READ_DATA: begin 
                    prev_image <= image_bits;
                    ready_in <= 0;
-                   if (image==MAX_NUM) begin 
-                        state<= RESET;
-                        done<=1;
+                   if (image>=MAX_NUM) begin 
+                        state <= RESET;
+                        done <= 1;
                    end else begin
                        image <= image+1;
                        state <= GET_DATA;
@@ -156,20 +168,56 @@ module visual (
                  MOVING_UP: begin
                     ready_in <= 0;
                     y <= y - speed;
-                    if (y<=46) state<= CHECK;
+
+                    // check perfect vs imperfect
+                    if (y <= (Y_PERFECT+Y_MARGIN)) begin 
+                        if (y >= Y_PERFECT) state<=CHECK_PERFECT;
+                        else state<=CHECK_IMPERFECT;
+                    end
+                    
                     prev_pause <= pause;
                     if (pause && (!prev_pause)) state<=PAUSE; //game paused
                 end
-                CHECK: begin 
-                   ready_in <= 1; 
-                   correct_data <= prev_image;
-                   state <= COLOR_CHECK;
-                   y <= Y_INIT;
+                CHECK_IMPERFECT: begin 
+                    ready_in <= 1;
+                    correct_data <= prev_image;
+                    state<=CHECK_WAIT;
+                    perfect_curr <= 0;
+                end
+                CHECK_WAIT: begin
+                    ready_in <= 0;
+                    if(correct || (y<50)) begin 
+                        correct_curr <= correct;
+                        state <= COLOR_CHECK;
+                        y<=Y_INIT;  
+                    end else begin 
+                        y <= y - speed;
+                        state<= MOVING_UP;
+                    end
+                end
+                CHECK_PERFECT: begin 
+                    perfect_curr <= 1;
+                    ready_in <= 1;
+                    correct_data <= prev_image;
+                    state<= PERFECT_WAIT;
+                end
+                PERFECT_WAIT: begin
+                    ready_in <= 0;
+                    if (correct) begin 
+                        state<= COLOR_CHECK;
+                        correct_curr <= correct;
+                        y <= Y_INIT;
+                    end else begin 
+                        y <= y - speed;
+                        state <= MOVING_UP;
+                    end
                 end
                 COLOR_CHECK: begin 
                     ready_in <= 0;
-                    if (correct) color <= 12'h0F0;
-                    else color <= 12'hF00;
+                    if (correct_curr) color <= 12'h0F0;
+                    else begin
+                        color <= 12'hF00;
+                    end
                     state<=READ_DATA;
                 end
                 default: state <= IDLE;
@@ -235,18 +283,33 @@ module visual (
                             .hcount_in(hcount),.vcount_in(vcount),
                             .pixel_out(streak_pixels),.on(streak));
     
+    // perfect vs imperfect line;
+    wire[11:0] perfect_line; // line is blue
+    rectangle_blob #(.HEIGHT(113)) 
+            perfect_blob(.x_in(0),.hcount_in(hcount),.y_in(163),.vcount_in(vcount),
+                        .color(12'b0000_0000_1111),.pixel_out(perfect_line));
 
-    //perfect vs imperfect line;
-    //wire[11:0] perfect_line;
-    //rectangle_blob perfect(.x_in(0),.hcount_in(hcount),.y_in(42),.vcount_in(vcount),
-                        //.color(color),.pixel_out(finish_line));
-
-//    ila_0 ila (.clk(clk), .probe0(state), .probe1(sensor_data[4:0]),.probe2(correct_data[4:0]),.probe3(ready_in),
-//                .probe4(correct),.probe5(0), .probe6(0), .probe7(0));
+    // alpha blending
+    logic[11:0] arrow_p;
+    logic[11:0] blended_pixels;
+    logic[3:0] r_pixels,b_pixels,g_pixels;
+    assign arrow_p = n_pixels + w_pixels + s_pixels +e_pixels; 
+    always_comb begin 
+        r_pixels = arrow_p[11:8] + 3*(perfect_line[11:8]>>2);
+        g_pixels = arrow_p[7:4] + 3*(perfect_line[7:4]>>2);
+        b_pixels = arrow_p[3:0] + 3*(perfect_line[3:0]>>2);
+        blended_pixels = {r_pixels,g_pixels,b_pixels};
+    end
     
+    assign perfect = perfect_curr;
     assign game_over = done;
-    assign arrow_pixels = finish_line + n_pixels + w_pixels + s_pixels +e_pixels + score_pixels_1 + score_pixels_2 + score_pixels_3 + streak_pixels;
-    
+
+    assign arrow_pixels = finish_line + blended_pixels +
+                        score_pixels_1 + score_pixels_2 + score_pixels_3 + streak_pixels;
+                        
+//     ila_0 ila (.clk(clk), .probe0(state), .probe1(sensor_data[4:0]),.probe2(correct_data[4:0]),.probe3(ready_in),
+//                .probe4(correct),.probe5(perfect), .probe6(0), .probe7(0));
+
 endmodule
 
 //////////////////////////////////////////////////////////////////////
@@ -255,7 +318,7 @@ endmodule
 //
 //////////////////////////////////////////////////////////////////////
 module rectangle_blob
-   #(parameter WIDTH = 900,   
+   #(parameter WIDTH = 1048,   
                HEIGHT = 8) 
    (input [10:0] x_in,hcount_in,
     input [9:0] y_in,vcount_in,
