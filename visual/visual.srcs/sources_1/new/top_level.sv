@@ -134,15 +134,6 @@ module top_level(
     display_8hex hex8(.clk_in(clk_65mhz),.data_in(data_display), .seg_out(segments), .strobe_out(an));
     
 
-//    assign data_display = {3'b00,out_data[3],
-//                            3'b00,out_data[2],
-//                            3'b00,correct_data[3],
-//                            3'b00,correct_data[2],
-//                            4'b00,
-//                            3'b00,score_ready,
-//                            3'b00,correct,
-//                            game_score[3:0]}; 
-
     // audio integration 
     top_level_audio audio(.clk(clk_100mhz), .clk_25mhz(clk_25mhz), .start(start), .pause(pause), .reset(reset), .sd_cd(sd_cd), // start from selector?
                             .selection(sw[1:0]), .sd_dat(sd_dat), .sd_reset(sd_reset), .sd_sck(sd_sck),

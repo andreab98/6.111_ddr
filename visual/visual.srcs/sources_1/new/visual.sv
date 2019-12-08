@@ -49,24 +49,6 @@ module visual (
     assign pvsync = vsync;
     assign pblank = blank;
     
-//    always_ff @(posedge clk) begin
-//        hsync_del_shift[3] <= hsync;
-//        vsync_del_shift[3] <= vsync;
-//        blank_del_shift[3] <= blank;
-        
-//        hsync_del_shift[0] <= hsync_del_shift[1];
-//        vsync_del_shift[0] <= vsync_del_shift[1];
-//        blank_del_shift[0] <= blank_del_shift[1];
-        
-//        hsync_del_shift[1] <= hsync_del_shift[2];
-//        vsync_del_shift[1] <= vsync_del_shift[2];
-//        blank_del_shift[1] <= blank_del_shift[2];
-        
-//        hsync_del_shift[2] <= hsync_del_shift[3];
-//        vsync_del_shift[2] <= vsync_del_shift[3];
-//        blank_del_shift[2] <= blank_del_shift[3];
-//    end
-    
     logic[11:0] y = Y_INIT;
     
     logic[10:0] N_arrow_x = 11'd100; 
@@ -230,7 +212,7 @@ module visual (
     logic [4:0] ones;
     bin_to_dec convert(.number(score), .hundreds(hundreds), .tens(tens), .ones(ones));
     
-    parameter score_height = 200; 
+    parameter score_height = 100; 
     parameter streak_height = 300;
     
     wire [11:0] score_pixels_1;
