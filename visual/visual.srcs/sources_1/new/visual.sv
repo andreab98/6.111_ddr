@@ -19,7 +19,7 @@ module visual (
    input[4:0] speed,
    input ready_start,
    input [31:0] score,
-   
+   input streak,    
    input correct,
    
    output perfect,
@@ -43,14 +43,17 @@ module visual (
     
     logic[11:0] y = Y_INIT;
     
-    logic[10:0] N_arrow_x = 11'd1; 
-    logic[10:0] S_arrow_x = 11'd123; 
-    logic[10:0] W_arrow_x = 11'd246; 
-    logic[10:0] E_arrow_x = 11'd369; 
+    logic[10:0] N_arrow_x = 11'd100; 
+    logic[10:0] S_arrow_x = 11'd223; 
+    logic[10:0] W_arrow_x = 11'd346; 
+    logic[10:0] E_arrow_x = 11'd469; 
+
 
     logic [10:0] score_1_x = 11'd764; 
-    logic [10:0] score_2_x = 11'd832; 
-    logic [10:0] score_3_x = 11'd900;
+    logic [10:0] score_2_x = 11'd814; 
+    logic [10:0] score_3_x = 11'd864;
+    
+    logic[10:0] streak_x = 11'd750;
     
     logic done = 0;
     
@@ -81,7 +84,7 @@ module visual (
     parameter PERFECT_WAIT = 10;
         
     // max number of choreo steps 
-    parameter MAX_NUM = 4;
+    parameter MAX_NUM = 110;
     
     parameter Y_PERFECT = 163;
     parameter Y_MARGIN = 10;
@@ -201,7 +204,8 @@ module visual (
     logic [4:0] ones;
     bin_to_dec convert(.number(score), .hundreds(hundreds), .tens(tens), .ones(ones));
     
-    parameter score_height = 100; 
+    parameter score_height = 200; 
+    parameter streak_height = 300;
     
     wire [11:0] score_pixels_1;
     score_blob_1 score1(.pixel_clk_in(clk), .x_in(score_1_x), .y_in(score_height), 
@@ -246,6 +250,11 @@ module visual (
     wire[11:0] finish_line;
     rectangle_blob finish(.x_in(0),.hcount_in(hcount),.y_in(42),.vcount_in(vcount),
                         .color(color),.pixel_out(finish_line));
+     
+    wire [11:0] streak_pixels;
+    streak_blob str(.pixel_clk_in(clk),.x_in(streak_x),.y_in(streak_height),
+                            .hcount_in(hcount),.vcount_in(vcount),
+                            .pixel_out(streak_pixels),.on(streak));
     
     // perfect vs imperfect line;
     wire[11:0] perfect_line; // line is blue
@@ -267,11 +276,13 @@ module visual (
     
     assign perfect = perfect_curr;
     assign game_over = done;
+
     assign arrow_pixels = finish_line + blended_pixels +
-                        score_pixels_1 + score_pixels_2 + score_pixels_3;
+                        score_pixels_1 + score_pixels_2 + score_pixels_3 + streak_pixels;
                         
 //     ila_0 ila (.clk(clk), .probe0(state), .probe1(sensor_data[4:0]),.probe2(correct_data[4:0]),.probe3(ready_in),
 //                .probe4(correct),.probe5(perfect), .probe6(0), .probe7(0));
+
 endmodule
 
 //////////////////////////////////////////////////////////////////////

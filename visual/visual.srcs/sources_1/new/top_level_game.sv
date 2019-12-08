@@ -12,7 +12,7 @@ module top_level_game(input clk, // system clock
                       input ready_in, //HIGH when arrow passes threshold on screen
                       
                       output logic correct,
-                      
+                      output logic streak,
                       output logic [31:0] score,
                       
                       //debugging
@@ -29,8 +29,8 @@ module top_level_game(input clk, // system clock
                     .intersection_data(sensor_data),.ready_in(ready_in),.correct(correct));
       
     //Score FSM Output
-    score_fsm update_score(.clk(clk), .start(start), .rst_in(reset), .game_over(game_over), 
-                           .score_ready(score_ready), .correct(correct), .perfect(perfect_check),
+    score_fsm update_score(.clk(clk), .start(start), .rst_in(reset), .game_over(game_over),
+                           .score_ready(score_ready), .correct(correct), .perfect(perfect_check),.streak_out(streak),
                            .updated_score(score));
     
     assign i = score_ready;
