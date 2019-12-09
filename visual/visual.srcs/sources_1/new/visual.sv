@@ -62,6 +62,7 @@ module visual (
     logic [10:0] score_3_x = 11'd864;
     
     logic[10:0] streak_x = 11'd750;
+    logic perfect_x = 11'd750;
     
     logic done = 0;
     
@@ -221,11 +222,11 @@ module visual (
     logic [4:0] tens; 
     logic [4:0] ones;
     bin_to_dec convert(.number(score), .hundreds(hundreds), .tens(tens), .ones(ones));
-    
+  
     parameter score_height = 100; 
     parameter streak_height = 300;
-
-
+    parameter perfect_height = 400;
+    
     wire [11:0] score_pixels_1;
     score_blob_1 score1(.pixel_clk_in(clk), .x_in(score_1_x), .y_in(score_height), 
                      .hcount_in(hcount), .vcount_in(vcount),
@@ -280,7 +281,7 @@ module visual (
     wire[11:0] perfect_line; // line is blue
     rectangle_blob #(.HEIGHT(113)) 
             perfect_blob(.x_in(0),.hcount_in(hcount),.y_in(163),.vcount_in(vcount),
-                        .color(12'b0000_0000_1111),.pixel_out(perfect_line));
+                        .color(12'h2EF),.pixel_out(perfect_line));
 
     // alpha blending
     logic[11:0] arrow_p;
@@ -296,9 +297,15 @@ module visual (
     
     assign perfect = perfect_curr;
     assign game_over = done;
+    
+    wire [11:0] perfect_pixels;
+    perfect_bonus_blob bonus(.pixel_clk_in(clk),.x_in(streak_x),.y_in(perfect_height),
+                            .hcount_in(hcount),.vcount_in(vcount),
+                            .pixel_out(perfect_pixels),.on(perfect));
 
     assign arrow_pixels = finish_line + blended_pixels + done_pixels +
-                        score_pixels_1 + score_pixels_2 + score_pixels_3 + streak_pixels;
+                        score_pixels_1 + score_pixels_2 + score_pixels_3 + streak_pixels + perfect_pixels;
+
                         
 //     ila_0 ila (.clk(clk), .probe0(state), .probe1(sensor_data[4:0]),.probe2(correct_data[4:0]),.probe3(ready_in),
 //                .probe4(correct),.probe5(perfect), .probe6(0), .probe7(0));
