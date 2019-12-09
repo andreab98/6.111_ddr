@@ -93,6 +93,7 @@ module selector(
    logic [9:0] loading_y = 10'd500;
    loading_blob load(.pixel_clk_in(clk), .x_in(loading_x), .hcount_in(hcount), .y_in(loading_y), 
                     .vcount_in(vcount), .pixel_out(loading_pixels), .on(counting));
+
     
     assign menu_pixels = menu_p + loading_pixels;
 

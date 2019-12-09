@@ -10,8 +10,8 @@ module menu_blob
                HEIGHT = 275,
                HCOUNT_LATENCY = 4)    // default picture height
    (input pixel_clk_in,
-    input [10:0] x_in,hcount_in,
-    input [9:0] y_in,vcount_in,
+    input [10:0] x_in, hcount_in,
+    input [9:0] y_in, vcount_in,
     output logic [11:0] pixel_out);
     
    logic [19:0] image_addr;   

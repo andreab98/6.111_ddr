@@ -91,9 +91,10 @@ module visual (
     parameter CHECK_IMPERFECT = 8;
     parameter CHECK_WAIT = 9;
     parameter PERFECT_WAIT = 10;
+    parameter GAME_OVER = 11;
         
     // max number of choreo steps 
-    parameter MAX_NUM = 110;
+    parameter MAX_NUM = 2;
     
     parameter Y_PERFECT = 163;
     parameter Y_MARGIN = 10;
@@ -103,7 +104,7 @@ module visual (
     logic prev_pause = 0;
     logic perfect_curr;
     logic correct_curr;
-    
+        
     reg[4:0] state = 0;
     logic curr_streak;
     always_ff @(posedge vsync) begin
@@ -125,6 +126,9 @@ module visual (
                     state<=IDLE;
                     ready_in <= 0;
                 end
+                GAME_OVER: begin 
+                    if (reset) state<= RESET;
+                end
                 PAUSE: begin
                     ready_in <= 0;
                     prev_pause <= pause;
@@ -134,7 +138,7 @@ module visual (
                    prev_image <= image_bits;
                    ready_in <= 0;
                    if (image>=MAX_NUM) begin 
-                        state <= RESET;
+                        state <= GAME_OVER;
                         done <= 1;
                    end else begin
                        image <= image+1;
@@ -210,6 +214,12 @@ module visual (
         end
     end
     
+    wire [11:0] done_pixels;
+    game_over_blob go(.pixel_clk_in(clk), .x_in(150), .y_in(300), 
+                     .hcount_in(hcount), .vcount_in(vcount),
+                     .pixel_out(done_pixels), .on(done));
+    
+    
     logic [4:0] hundreds;
     logic [4:0] tens; 
     logic [4:0] ones;
@@ -221,7 +231,7 @@ module visual (
     
     wire [11:0] score_pixels_1;
     score_blob_1 score1(.pixel_clk_in(clk), .x_in(score_1_x), .y_in(score_height), 
-                     .hcount_in(hcount), .vcount_in(vcount), 
+                     .hcount_in(hcount), .vcount_in(vcount),
                      .pixel_out(score_pixels_1), .num(hundreds));
     
     wire [11:0] score_pixels_2;
@@ -295,8 +305,9 @@ module visual (
                             .hcount_in(hcount),.vcount_in(vcount),
                             .pixel_out(perfect_pixels),.on((correct && perfect)));
 
-    assign arrow_pixels = finish_line + blended_pixels +
+    assign arrow_pixels = finish_line + blended_pixels + done_pixels +
                         score_pixels_1 + score_pixels_2 + score_pixels_3 + streak_pixels + perfect_pixels;
+
                         
 //     ila_0 ila (.clk(clk), .probe0(state), .probe1(sensor_data[4:0]),.probe2(correct_data[4:0]),.probe3(ready_in),
 //                .probe4(correct),.probe5(perfect), .probe6(0), .probe7(0));
