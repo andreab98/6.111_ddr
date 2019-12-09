@@ -35,7 +35,8 @@ module top_level(
     logic clk_100mhz_out;
     logic clk_25mhz; // for sd card
     logic clk_65mhz; // for visual
-    clk_wiz_0 make_clocks(.clk_in1(clk_100mhz),.reset(0), .clk_out1(clk_25mhz), .clk_out2(clk_100mhz_out), .clk_out3(clk_65mhz));
+    //clk_wiz_0 make_clocks(.clk_in1(clk_100mhz),.reset(0), .clk_out1(clk_25mhz), .clk_out2(clk_100mhz_out), .clk_out3(clk_65mhz));
+    final_clock_wizard clocks(.clk_in1(clk_100mhz),.reset(0), .clk_out1(clk_100mhz_out), .clk_out2(clk_65mhz), .clk_out3(clk_25mhz));
     
     logic reset; 
     logic start;

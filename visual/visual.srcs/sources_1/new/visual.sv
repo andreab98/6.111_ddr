@@ -94,7 +94,7 @@ module visual (
     parameter GAME_OVER = 11;
         
     // max number of choreo steps 
-    parameter MAX_NUM = 2;
+    parameter MAX_NUM = 100;
     
     parameter Y_PERFECT = 163;
     parameter Y_MARGIN = 10;
