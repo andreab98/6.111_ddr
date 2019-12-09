@@ -45,9 +45,9 @@ module top_level_audio(input clk,
     
     // set initial address based on selected song 
     logic [31:0] addr_0;
-    parameter MORE_START_ADDR = 32'h3E00; // More by Usher
-    parameter WAVING_START_ADDR = 32'hE56E00; // Waving Through a Window 
-    parameter DONT_START_ADDR = 32'h1CA9400; // Don't Stop Me Now
+    parameter MORE_START_ADDR = 32'h4200; // More by Usher
+    parameter WAVING_START_ADDR = 32'hE57200; // Waving Through a Window 
+    parameter DONT_START_ADDR = 32'h1CB0400; // Don't Stop Me Now
     
     always_comb begin
         if (selection[1:0] == 2'b01) begin 
@@ -214,7 +214,6 @@ module top_level_audio(input clk,
         endcase
         
     end 
-    
     
     audio_PWM pwm(.clk_in(clk), .rst_in(reset), .level_in(data_from_fifo), .pwm_out(aud_pwm));
     
