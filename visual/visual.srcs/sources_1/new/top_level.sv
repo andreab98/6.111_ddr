@@ -60,6 +60,8 @@ module top_level(
     reg[4:0] speed;
     wire [11:0] menu_pixels;
     wire phsync_m,pvsync_m,pblank_m;
+    //reg [1:0] level = sw[1:0];
+    
     logic game_ready;
     selector select(.clk(clk_65mhz), .hcount(hcount),.vcount(vcount),
                     .hsync(hsync), .vsync(vsync), .blank(blank),

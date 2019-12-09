@@ -45,7 +45,7 @@ module selector(
     logic one_hz; 
     logic [3:0] count_out;
     
-    timer countdown(.clock(clk), .start_timer(reset), .value(4'd10),.counting(counting), 
+    timer countdown(.clock(clk), .start_timer(reset), .value(4'd6),.counting(counting), 
                     .expired_pulse(expired), .one_hz(one_hz), .count_out(count_out));
                     
     always_ff @(posedge clk) begin 

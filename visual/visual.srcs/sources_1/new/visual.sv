@@ -78,8 +78,8 @@ module visual (
     
     logic [4:0] prev_image = 0;
    
-    choreo steps(.clka(vsync), .addra(image_addr), .douta(image_bits));
-       
+    //choreo steps(.clka(vsync), .addra(image_addr), .douta(image_bits));
+    fun_choreo dance(.clka(vsync), .addra(image_addr), .douta(image_bits));   
     parameter IDLE = 0;
     parameter MOVING_UP = 1;
     parameter RESET = 2;
@@ -94,6 +94,20 @@ module visual (
     parameter GAME_OVER = 11;
         
     // max number of choreo steps 
+    //parameter MAX_NUM = 80;
+//    logic num_steps;
+//    always_comb begin 
+//        if (level == 2'b01)begin 
+//            num_steps = 70;
+//        end else if (level == 2'b10) begin
+//            num_steps = 105;
+//        end else if (level == 2'b11) begin
+//            num_steps = 140;
+//        end else begin 
+//            num_steps = 0;
+//        end 
+//    end 
+    
     parameter MAX_NUM = 100;
     
     parameter Y_PERFECT = 163;
