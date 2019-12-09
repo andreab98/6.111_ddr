@@ -105,7 +105,9 @@ module visual (
     logic correct_curr;
     
     reg[4:0] state = 0;
+    logic curr_streak;
     always_ff @(posedge vsync) begin
+        curr_streak <= streak;
         if (reset) begin 
             state<= RESET;
         end else begin
@@ -265,7 +267,7 @@ module visual (
     wire [11:0] streak_pixels;
     streak_blob str(.pixel_clk_in(clk),.x_in(streak_x),.y_in(streak_height),
                             .hcount_in(hcount),.vcount_in(vcount),
-                            .pixel_out(streak_pixels),.on(streak));
+                            .pixel_out(streak_pixels),.on((streak ||curr_streak)));
     
     // perfect vs imperfect line;
     wire[11:0] perfect_line; // line is blue
@@ -291,7 +293,7 @@ module visual (
     wire [11:0] perfect_pixels;
     perfect_bonus_blob bonus(.pixel_clk_in(clk),.x_in(streak_x),.y_in(perfect_height),
                             .hcount_in(hcount),.vcount_in(vcount),
-                            .pixel_out(perfect_pixels),.on(perfect));
+                            .pixel_out(perfect_pixels),.on((correct && perfect)));
 
     assign arrow_pixels = finish_line + blended_pixels +
                         score_pixels_1 + score_pixels_2 + score_pixels_3 + streak_pixels + perfect_pixels;

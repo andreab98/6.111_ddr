@@ -52,7 +52,7 @@ module score_fsm(input clk,
                 if (correct&&perfect) begin 
                     score <= score + 4;
                     streak <= streak + 1;
-                end if (correct && (!perfect)) begin 
+                end else if (correct && (!perfect)) begin 
                     score <= score + 2;
                     streak <= streak + 1;
                 end else streak<=0;
@@ -63,7 +63,7 @@ module score_fsm(input clk,
                 
                 if (correct&&perfect) begin 
                     score <= score + 2;
-                end if (correct && (!perfect)) begin 
+                end else if (correct && (!perfect)) begin 
                     score <= score + 1;
                 end 
                 
