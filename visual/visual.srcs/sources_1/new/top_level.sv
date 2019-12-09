@@ -63,10 +63,11 @@ module top_level(
     //reg [1:0] level = sw[1:0];
     
     logic game_ready;
+    wire[11:0] max_num;
     selector select(.clk(clk_65mhz), .hcount(hcount),.vcount(vcount),
                     .hsync(hsync), .vsync(vsync), .blank(blank),
                     .level(sw[1:0]),.start(start),.game_ready(game_ready),.reset(reset),
-                    .speed(speed),.menu_pixels(menu_pixels),
+                    .speed(speed),.menu_pixels(menu_pixels),.max_steps(max_num),
                     .phsync_out(phsync_m),.pvsync_out(pvsync_m),.pblank_out(pblank_m));
     
     //sensor integration
@@ -101,7 +102,7 @@ module top_level(
             .reset(reset), .pause(pause), .game_over(game_over), .score(game_score),
             .correct_data(correct_data), .ready_in(ready_in), .correct(correct), .perfect(perfect), .streak(streak),
             .vcount(vcount), .hcount(hcount), .hsync(hsync), .vsync(vsync), .blank(blank),
-            .arrow_pixels(visual_pixels));
+            .arrow_pixels(visual_pixels),.max_num(max_num));
             
     //ila_0 ila (.clk(clk_65mhz), .probe0(0), .probe1(out_data[4:0]),.probe2(correct_data[4:0]),.probe3(ready_in),
      //           .probe4(correct),.probe5(perfect), .probe6(0), .probe7(0));

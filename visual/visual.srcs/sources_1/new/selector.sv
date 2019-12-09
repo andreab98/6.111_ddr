@@ -15,7 +15,9 @@ module selector(
                     
         output [11:0] menu_pixels,
         output [4:0] speed,
-        output game_ready  
+        output game_ready,
+        
+        output [11:0] max_steps
     );
     
     assign phsync_out = hsync;
@@ -29,6 +31,10 @@ module selector(
     parameter SPEED_1 = 2;
     parameter SPEED_2 = 4;
     parameter SPEED_3 = 8;
+    
+    parameter MAX_1 = 50;
+    parameter MAX_2 = 70;
+    parameter MAX_3 = 100;
     
     logic game_start = 0;
     logic[4:0] s;
@@ -47,7 +53,8 @@ module selector(
     
     timer countdown(.clock(clk), .start_timer(reset), .value(4'd6),.counting(counting), 
                     .expired_pulse(expired), .one_hz(one_hz), .count_out(count_out));
-                    
+    
+    logic[10:0] max = 0;
     always_ff @(posedge clk) begin 
         if (reset) begin
             state<=RESET;
@@ -62,12 +69,15 @@ module selector(
                     case (level) 
                         LEVEL_1:begin
                             s <= SPEED_1;
+                            max<=MAX_1;
                         end
                         LEVEL_2: begin 
                             s <= SPEED_2;
+                            max<=MAX_2;
                         end
                         LEVEL_3:begin
                             s<= SPEED_3;
+                            max<=MAX_3;
                         end
                     endcase
                     state<=DONE;
@@ -79,6 +89,7 @@ module selector(
     
     assign speed = s;
     assign game_ready = game_start;
+    assign max_steps = max;
     
     // menu pixels
     logic[10:0] x_begin = 11'd300;

@@ -22,6 +22,8 @@ module visual (
    input streak,    
    input correct,
    
+   input[11:0] max_num,
+   
    output perfect,
    
    output logic [4:0] correct_data,
@@ -93,23 +95,6 @@ module visual (
     parameter PERFECT_WAIT = 10;
     parameter GAME_OVER = 11;
         
-    // max number of choreo steps 
-    //parameter MAX_NUM = 80;
-//    logic num_steps;
-//    always_comb begin 
-//        if (level == 2'b01)begin 
-//            num_steps = 70;
-//        end else if (level == 2'b10) begin
-//            num_steps = 105;
-//        end else if (level == 2'b11) begin
-//            num_steps = 140;
-//        end else begin 
-//            num_steps = 0;
-//        end 
-//    end 
-    
-    parameter MAX_NUM = 100;
-    
     parameter Y_PERFECT = 163;
     parameter Y_MARGIN = 10;
         
@@ -128,6 +113,7 @@ module visual (
         end else begin
             case(state)  
                 IDLE: begin 
+                   y <= Y_INIT; ////delete if doesnt work
                    if (ready_start) begin 
                     state<= READ_DATA;
                     ready_in <= 0;
@@ -136,7 +122,7 @@ module visual (
                 RESET: begin 
                     image <= 0; // reset image address
                     color <= 12'hFFF; //reset back to white
-                    y <= Y_INIT;
+//                    y <= Y_INIT;
                     state<=IDLE;
                     ready_in <= 0;
                 end
@@ -151,7 +137,7 @@ module visual (
                 READ_DATA: begin 
                    prev_image <= image_bits;
                    ready_in <= 0;
-                   if (image>=MAX_NUM) begin 
+                   if (image>=max_num) begin 
                         state <= GAME_OVER;
                         done <= 1;
                    end else begin
@@ -167,6 +153,7 @@ module visual (
                     s <= image_bits[0]; //H S
                     state<=MOVING_UP; 
                     ready_in <= 0;  
+                    y<=Y_INIT; ////delete if doesnt work
                 end
                  MOVING_UP: begin
                     ready_in <= 0;
@@ -192,7 +179,7 @@ module visual (
                     if(correct || (y<50)) begin 
                         correct_curr <= correct;
                         state <= COLOR_CHECK;
-                        y<=Y_INIT;  
+                        // y<=Y_INIT;  
                     end else begin 
                         y <= y - speed;
                         state<= MOVING_UP;
@@ -209,7 +196,7 @@ module visual (
                     if (correct) begin 
                         state<= COLOR_CHECK;
                         correct_curr <= correct;
-                        y <= Y_INIT;
+                        //y <= Y_INIT;
                     end else begin 
                         y <= y - speed;
                         state <= MOVING_UP;
