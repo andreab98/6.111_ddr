@@ -80,7 +80,7 @@ module selector(
     menu_blob m(.pixel_clk_in(clk),.x_in(x_begin),.hcount_in(hcount),.y_in(y_begin),.vcount_in(vcount),
                         .pixel_out(menu_p));
     
-   
+    
     
     
     assign menu_pixels = menu_p;

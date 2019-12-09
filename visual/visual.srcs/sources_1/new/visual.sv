@@ -82,9 +82,10 @@ module visual (
     parameter CHECK_IMPERFECT = 8;
     parameter CHECK_WAIT = 9;
     parameter PERFECT_WAIT = 10;
+    parameter GAME_OVER = 11;
         
     // max number of choreo steps 
-    parameter MAX_NUM = 110;
+    parameter MAX_NUM = 2;
     
     parameter Y_PERFECT = 163;
     parameter Y_MARGIN = 10;
@@ -114,6 +115,9 @@ module visual (
                     state<=IDLE;
                     ready_in <= 0;
                 end
+                GAME_OVER: begin 
+                    if (reset) state<= RESET;
+                end
                 PAUSE: begin
                     ready_in <= 0;
                     prev_pause <= pause;
@@ -123,7 +127,7 @@ module visual (
                    prev_image <= image_bits;
                    ready_in <= 0;
                    if (image>=MAX_NUM) begin 
-                        state <= RESET;
+                        state <= GAME_OVER;
                         done <= 1;
                    end else begin
                        image <= image+1;
