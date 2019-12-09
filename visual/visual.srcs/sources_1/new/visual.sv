@@ -103,7 +103,7 @@ module visual (
     logic prev_pause = 0;
     logic perfect_curr;
     logic correct_curr;
-    
+        
     reg[4:0] state = 0;
     always_ff @(posedge vsync) begin
         if (reset) begin 
@@ -211,6 +211,12 @@ module visual (
         end
     end
     
+    wire [11:0] done_pixels;
+    game_over_blob go(.pixel_clk_in(clk), .x_in(150), .y_in(300), 
+                     .hcount_in(hcount), .vcount_in(vcount),
+                     .pixel_out(done_pixels), .on(done));
+    
+    
     logic [4:0] hundreds;
     logic [4:0] tens; 
     logic [4:0] ones;
@@ -218,10 +224,11 @@ module visual (
     
     parameter score_height = 100; 
     parameter streak_height = 300;
-    
+
+
     wire [11:0] score_pixels_1;
     score_blob_1 score1(.pixel_clk_in(clk), .x_in(score_1_x), .y_in(score_height), 
-                     .hcount_in(hcount), .vcount_in(vcount), 
+                     .hcount_in(hcount), .vcount_in(vcount),
                      .pixel_out(score_pixels_1), .num(hundreds));
     
     wire [11:0] score_pixels_2;
@@ -290,7 +297,7 @@ module visual (
     assign perfect = perfect_curr;
     assign game_over = done;
 
-    assign arrow_pixels = finish_line + blended_pixels +
+    assign arrow_pixels = finish_line + blended_pixels + done_pixels +
                         score_pixels_1 + score_pixels_2 + score_pixels_3 + streak_pixels;
                         
 //     ila_0 ila (.clk(clk), .probe0(state), .probe1(sensor_data[4:0]),.probe2(correct_data[4:0]),.probe3(ready_in),

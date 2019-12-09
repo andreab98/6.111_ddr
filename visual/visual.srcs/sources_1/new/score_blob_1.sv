@@ -23,7 +23,7 @@
 module score_blob_1
     #(parameter WIDTH = 48,     // default picture width
                HEIGHT = 48,
-               HCOUNT_LATENCY =4)    // default picture height
+               HCOUNT_LATENCY = 4)    // default picture height
    (input pixel_clk_in,
     input [10:0] x_in,hcount_in,
     input [9:0] y_in,vcount_in,
@@ -36,7 +36,7 @@ module score_blob_1
    
    // calculate rom address and read the location
    assign image_addr = ((hcount_in + HCOUNT_LATENCY) -x_in) + (vcount_in-y_in) * WIDTH + 2304 * num;
-   
+
    score2 score(.clka(pixel_clk_in), .addra(image_addr), .douta(image_bits));
 
    rgbcm score1 (.clka(pixel_clk_in), .addra(image_bits), .douta(red_mapped));
