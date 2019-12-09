@@ -1,13 +1,19 @@
 `timescale 1ns / 1ps
+///////////////////////////////////////////////////////////////////
+//                                                               //
+// selector: determines the game state based on the level chosen //
+//                                                               //
+///////////////////////////////////////////////////////////////////
+
 module selector(
         input clk,
+        input reset,
         input[1:0] level,
         input start,
         input[10:0] hcount,
         input[9:0] vcount,
         input hsync,vsync,blank,
         
-        input reset,
         
         output phsync_out,
         output pvsync_out,    
@@ -16,7 +22,6 @@ module selector(
         output [11:0] menu_pixels,
         output [4:0] speed,
         output game_ready,
-        
         output [11:0] max_steps
     );
     
@@ -24,6 +29,7 @@ module selector(
     assign pvsync_out = vsync;
     assign pblank_out = blank;
     
+    // parameters for speed and max steps based on level
     parameter LEVEL_1 = 2'b01;
     parameter LEVEL_2 = 2'b10;
     parameter LEVEL_3 = 2'b11;
@@ -38,6 +44,7 @@ module selector(
     
     logic game_start = 0;
     logic[4:0] s;
+    logic[10:0] max = 0;
     
     reg[3:0] state= 0;
     
@@ -46,15 +53,16 @@ module selector(
     parameter DONE = 2;
     parameter RESET = 3;
     
+    
+    // timer inputs/ouputs to be able to create the loading 
     logic expired; 
     logic counting;
     logic one_hz; 
-    logic [3:0] count_out;
-    
+    logic [3:0] count_out;    
     timer countdown(.clock(clk), .start_timer(reset), .value(4'd6),.counting(counting), 
                     .expired_pulse(expired), .one_hz(one_hz), .count_out(count_out));
     
-    logic[10:0] max = 0;
+    
     always_ff @(posedge clk) begin 
         if (reset) begin
             state<=RESET;
@@ -94,18 +102,18 @@ module selector(
     // menu pixels
     logic[10:0] x_begin = 11'd300;
     logic[9:0] y_begin = 10'd200; 
-    
     wire[11:0] menu_p;
     menu_blob m(.pixel_clk_in(clk),.x_in(x_begin),.hcount_in(hcount),.y_in(y_begin),.vcount_in(vcount),
                         .pixel_out(menu_p));
-    
-   wire [11:0] loading_pixels;
-   logic[10:0] loading_x = 11'd320;
-   logic [9:0] loading_y = 10'd500;
-   loading_blob load(.pixel_clk_in(clk), .x_in(loading_x), .hcount_in(hcount), .y_in(loading_y), 
+                        
+    // loading pixels
+    wire [11:0] loading_pixels;
+    logic[10:0] loading_x = 11'd320;
+    logic [9:0] loading_y = 10'd500;
+    loading_blob load(.pixel_clk_in(clk), .x_in(loading_x), .hcount_in(hcount), .y_in(loading_y), 
                     .vcount_in(vcount), .pixel_out(loading_pixels), .on(counting));
 
-    
+    // final output pixels
     assign menu_pixels = menu_p + loading_pixels;
 
 endmodule

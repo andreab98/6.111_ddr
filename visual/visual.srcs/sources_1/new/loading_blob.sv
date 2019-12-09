@@ -1,22 +1,6 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
-// Create Date: 12/08/2019 07:45:55 PM
-// Design Name: 
-// Module Name: loading_blob
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
+// loading_blob: comes up before the game starts to load the music
 //////////////////////////////////////////////////////////////////////////////////
 
 
@@ -24,11 +8,13 @@ module loading_blob
  #(parameter WIDTH = 395,     // default picture width
                HEIGHT = 77,
                HCOUNT_LATENCY = 4)    // default picture height
-   (input pixel_clk_in,
-    input [10:0] x_in,hcount_in,
-    input [9:0] y_in,vcount_in,
-    input on,
-    output logic [11:0] pixel_out);
+   (    input pixel_clk_in,
+        input [10:0] x_in,hcount_in,
+        input [9:0] y_in,vcount_in,
+        input on, // determined whether or not to show the image
+    
+        output logic [11:0] pixel_out
+    );
     
    logic [19:0] image_addr;   
    logic [7:0] image_bits, load_mapped;

@@ -14,23 +14,20 @@ module visual (
    input vsync,         // XVGA vertical sync signal (active low)
    input blank,         // XVGA blanking (1 means output black pixel)
    
-   input[4:0] sensor_data,
-   input reset, pause, start,
+   input reset, pause, start, // system inputs
    input[4:0] speed,
    input ready_start,
-   input [31:0] score,
+   input [31:0] score, // current score to display
    input streak,    
    input correct,
-   
    input[11:0] max_num,
    
-   output perfect,
-   
-   output logic [4:0] correct_data,
-   output logic ready_in,   
-   
+   output perfect, // if perfect
+   output logic [4:0] correct_data, // corect data at the top of the screen
+   output logic ready_in, // check against sensor data signal
    output game_over, //game over signal
    
+   // visual output parameters
    output phsync,
    output pvsync,    
    output pblank,  
@@ -38,15 +35,7 @@ module visual (
    );
     
     parameter Y_INIT = 600;
-    
-    parameter DELAY_SHIFT = 2;
-    
-    logic [3:0] hsync_del_shift;
-    logic [3:0] vsync_del_shift;
-    logic [3:0] blank_del_shift;
-    
-    integer i;
-    
+                
     assign phsync = hsync;
     assign pvsync = vsync;
     assign pblank = blank;
@@ -64,7 +53,6 @@ module visual (
     logic [10:0] score_3_x = 11'd864;
     
     logic[10:0] streak_x = 11'd750;
-    logic perfect_x = 11'd750;
     
     logic done = 0;
     
@@ -113,7 +101,7 @@ module visual (
         end else begin
             case(state)  
                 IDLE: begin 
-                   y <= Y_INIT; ////delete if doesnt work
+                   y <= Y_INIT; 
                    if (ready_start) begin 
                     state<= READ_DATA;
                     ready_in <= 0;
@@ -122,7 +110,6 @@ module visual (
                 RESET: begin 
                     image <= 0; // reset image address
                     color <= 12'hFFF; //reset back to white
-//                    y <= Y_INIT;
                     state<=IDLE;
                     ready_in <= 0;
                 end
@@ -153,7 +140,7 @@ module visual (
                     s <= image_bits[0]; //H S
                     state<=MOVING_UP; 
                     ready_in <= 0;  
-                    y<=Y_INIT; ////delete if doesnt work
+                    y<=Y_INIT; 
                 end
                  MOVING_UP: begin
                     ready_in <= 0;
@@ -179,7 +166,6 @@ module visual (
                     if(correct || (y<50)) begin 
                         correct_curr <= correct;
                         state <= COLOR_CHECK;
-                        // y<=Y_INIT;  
                     end else begin 
                         y <= y - speed;
                         state<= MOVING_UP;
@@ -196,7 +182,6 @@ module visual (
                     if (correct) begin 
                         state<= COLOR_CHECK;
                         correct_curr <= correct;
-                        //y <= Y_INIT;
                     end else begin 
                         y <= y - speed;
                         state <= MOVING_UP;
@@ -220,7 +205,7 @@ module visual (
                      .hcount_in(hcount), .vcount_in(vcount),
                      .pixel_out(done_pixels), .on(done));
     
-    
+    // determine score and display using 3 numbers (000 to 999)
     logic [4:0] hundreds;
     logic [4:0] tens; 
     logic [4:0] ones;
@@ -274,7 +259,7 @@ module visual (
     rectangle_blob finish(.x_in(0),.hcount_in(hcount),.y_in(42),.vcount_in(vcount),
                         .color(color),.pixel_out(finish_line));
      
-        
+    // streak code    
     wire [11:0] streak_pixels;
     streak_blob str(.pixel_clk_in(clk),.x_in(streak_x),.y_in(streak_height),
                             .hcount_in(hcount),.vcount_in(vcount),
@@ -301,6 +286,7 @@ module visual (
     assign perfect = perfect_curr;
     assign game_over = done;
     
+    // perfect bonus pixels
     wire [11:0] perfect_pixels;
     perfect_bonus_blob bonus(.pixel_clk_in(clk),.x_in(streak_x),.y_in(perfect_height),
                             .hcount_in(hcount),.vcount_in(vcount),
@@ -308,10 +294,6 @@ module visual (
 
     assign arrow_pixels = finish_line + blended_pixels + done_pixels +
                         score_pixels_1 + score_pixels_2 + score_pixels_3 + streak_pixels + perfect_pixels;
-
-                        
-//     ila_0 ila (.clk(clk), .probe0(state), .probe1(sensor_data[4:0]),.probe2(correct_data[4:0]),.probe3(ready_in),
-//                .probe4(correct),.probe5(perfect), .probe6(0), .probe7(0));
 
 endmodule
 
