@@ -40,6 +40,14 @@ module selector(
     parameter DONE = 2;
     parameter RESET = 3;
     
+    logic expired; 
+    logic counting;
+    logic one_hz; 
+    logic [3:0] count_out;
+    
+    timer countdown(.clock(clk), .start_timer(reset), .value(4'd10),.counting(counting), 
+                    .expired_pulse(expired), .one_hz(one_hz), .count_out(count_out));
+                    
     always_ff @(posedge clk) begin 
         if (reset) begin
             state<=RESET;
@@ -80,9 +88,12 @@ module selector(
     menu_blob m(.pixel_clk_in(clk),.x_in(x_begin),.hcount_in(hcount),.y_in(y_begin),.vcount_in(vcount),
                         .pixel_out(menu_p));
     
-   
+   wire [11:0] loading_pixels;
+   logic[10:0] loading_x = 11'd320;
+   logic [9:0] loading_y = 10'd500;
+   loading_blob load(.pixel_clk_in(clk), .x_in(loading_x), .hcount_in(hcount), .y_in(loading_y), 
+                    .vcount_in(vcount), .pixel_out(loading_pixels), .on(counting));
     
-    
-    assign menu_pixels = menu_p;
+    assign menu_pixels = menu_p + loading_pixels;
 
 endmodule

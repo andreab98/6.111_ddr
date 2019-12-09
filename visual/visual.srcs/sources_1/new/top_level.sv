@@ -4,7 +4,7 @@ module top_level(
    input clk_100mhz,
    input btnc, // start signal
    input btnr, // system reset
-   input btnl, // system pause
+   input btnl, // system pause]
    input sd_cd, // sd card input
    
    input[15:0] sw,
