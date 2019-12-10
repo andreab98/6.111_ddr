@@ -1,9 +1,9 @@
-
 `timescale 1ns / 1ps
+
 //////////////////////////////////////////////////////////////////////////////////
-////
-//// visual: movement of arrows 
-////
+//
+//  visual: movement of arrows 
+//
 //////////////////////////////////////////////////////////////////////////////////
 
 module visual (
@@ -14,13 +14,12 @@ module visual (
    input vsync,         // XVGA vertical sync signal (active low)
    input blank,         // XVGA blanking (1 means output black pixel)
    
-   input reset, pause, start, // system inputs
-   input[4:0] speed,
-   input ready_start,
+   input reset, pause, ready_start, // system inputs
+   input[4:0] speed, // speed of arrows
    input [31:0] score, // current score to display
-   input streak,    
+   input streak,  
    input correct,
-   input[11:0] max_num,
+   input[11:0] max_num, //number of steps before game_over
    
    output perfect, // if perfect
    output logic [4:0] correct_data, // corect data at the top of the screen
@@ -33,43 +32,51 @@ module visual (
    output pblank,  
    output [11:0] arrow_pixels 
    );
-    
-    parameter Y_INIT = 600;
                 
     assign phsync = hsync;
     assign pvsync = vsync;
     assign pblank = blank;
     
+    // initial y param for arrows
+    parameter Y_INIT = 600;
     logic[11:0] y = Y_INIT;
     
-    logic[10:0] N_arrow_x = 11'd100; 
-    logic[10:0] S_arrow_x = 11'd223; 
-    logic[10:0] W_arrow_x = 11'd346; 
-    logic[10:0] E_arrow_x = 11'd469; 
+    // x location for arrows
+    parameter N_ARROW_X = 100; 
+    parameter S_ARROW_X = 223; 
+    parameter W_ARROW_X = 346; 
+    parameter E_ARROW_X = 469; 
 
-
-    logic [10:0] score_1_x = 11'd764; 
-    logic [10:0] score_2_x = 11'd814; 
-    logic [10:0] score_3_x = 11'd864;
+    // x location for score blobs
+    parameter SCORE_1_X = 764; 
+    parameter SCORE_2_X = 814; 
+    parameter SCORE_3_X = 864;
     
-    logic[10:0] streak_x = 11'd750;
+    // x location for Streak and Perfect blobs
+    parameter STR_PERF_X = 750;
     
+    // game over variable
     logic done = 0;
     
-    logic[11:0] color =  12'hFFF;
+    logic[11:0] color =  12'hFFF; // initialize bar as white
         
     // read new choreo line 
     logic [15:0] image = 0;   
     logic [4:0] image_bits;
-   
-    logic[15:0] image_addr;
+    
     // calculate rom address and read the location
+    logic[15:0] image_addr;
     assign image_addr = image;
     
     logic [4:0] prev_image = 0;
-   
+    
+    // uncomment to use choreo with only one step at a time
     //choreo steps(.clka(vsync), .addra(image_addr), .douta(image_bits));
+    
+    // includes two steps at a time 
     fun_choreo dance(.clka(vsync), .addra(image_addr), .douta(image_bits));   
+    
+    // define states
     parameter IDLE = 0;
     parameter MOVING_UP = 1;
     parameter RESET = 2;
@@ -112,6 +119,7 @@ module visual (
                     color <= 12'hFFF; //reset back to white
                     state<=IDLE;
                     ready_in <= 0;
+                    perfect_curr<=0;
                 end
                 GAME_OVER: begin 
                     if (reset) state<= RESET;
@@ -142,7 +150,7 @@ module visual (
                     ready_in <= 0;  
                     y<=Y_INIT; 
                 end
-                 MOVING_UP: begin
+                MOVING_UP: begin
                     ready_in <= 0;
                     y <= y - speed;
 
@@ -200,6 +208,7 @@ module visual (
         end
     end
     
+    // game over code
     wire [11:0] done_pixels;
     game_over_blob go(.pixel_clk_in(clk), .x_in(150), .y_in(300), 
                      .hcount_in(hcount), .vcount_in(vcount),
@@ -211,46 +220,46 @@ module visual (
     logic [4:0] ones;
     bin_to_dec convert(.number(score), .hundreds(hundreds), .tens(tens), .ones(ones));
   
-    parameter score_height = 100; 
-    parameter streak_height = 300;
-    parameter perfect_height = 400;
+    parameter SCORE_HEIGHT = 100; 
+    parameter STREAK_HEIGHT = 300;
+    parameter PERFECT_HEIGHT = 400;
     
     wire [11:0] score_pixels_1;
-    score_blob_1 score1(.pixel_clk_in(clk), .x_in(score_1_x), .y_in(score_height), 
+    score_blob_1 score1(.pixel_clk_in(clk), .x_in(SCORE_1_X), .y_in(SCORE_HEIGHT), 
                      .hcount_in(hcount), .vcount_in(vcount),
                      .pixel_out(score_pixels_1), .num(hundreds));
     
     wire [11:0] score_pixels_2;
-    score_blob_2 score2(.pixel_clk_in(clk), .x_in(score_2_x), .y_in(score_height), 
+    score_blob_2 score2(.pixel_clk_in(clk), .x_in(SCORE_2_X), .y_in(SCORE_HEIGHT), 
                      .hcount_in(hcount), .vcount_in(vcount), 
                      .pixel_out(score_pixels_2), .num(tens));
                       
     wire [11:0] score_pixels_3;
-    score_blob_3 score3(.pixel_clk_in(clk), .x_in(score_3_x), .y_in(score_height), 
+    score_blob_3 score3(.pixel_clk_in(clk), .x_in(SCORE_3_X), .y_in(SCORE_HEIGHT), 
                      .hcount_in(hcount), .vcount_in(vcount), 
                      .pixel_out(score_pixels_3), .num(ones));
                      
     // up arrow code
     wire [11:0] n_pixels;
-    N_arrow_blob up(.pixel_clk_in(clk),.x_in(N_arrow_x),.y_in(y),
+    N_arrow_blob up(.pixel_clk_in(clk),.x_in(N_ARROW_X),.y_in(y),
                             .hcount_in(hcount),.vcount_in(vcount),
                             .pixel_out(n_pixels),.on(n));
                             
     // west arrow code
     wire [11:0] w_pixels;
-    W_arrow_blob west(.pixel_clk_in(clk),.x_in(W_arrow_x),.y_in(y),
+    W_arrow_blob west(.pixel_clk_in(clk),.x_in(W_ARROW_X),.y_in(y),
                             .hcount_in(hcount),.vcount_in(vcount),
                             .pixel_out(w_pixels),.on(w));
                             
     // south arrow code
     wire [11:0] s_pixels;
-    S_arrow_blob south(.pixel_clk_in(clk),.x_in(S_arrow_x),.y_in(y),
+    S_arrow_blob south(.pixel_clk_in(clk),.x_in(S_ARROW_X),.y_in(y),
                             .hcount_in(hcount),.vcount_in(vcount),
                             .pixel_out(s_pixels),.on(s));
                             
    // east arrow code
     wire [11:0] e_pixels;
-    E_arrow_blob east(.pixel_clk_in(clk),.x_in(E_arrow_x),.y_in(y),
+    E_arrow_blob east(.pixel_clk_in(clk),.x_in(E_ARROW_X),.y_in(y),
                             .hcount_in(hcount),.vcount_in(vcount),
                             .pixel_out(e_pixels),.on(e));
                             
@@ -258,12 +267,6 @@ module visual (
     wire[11:0] finish_line;
     rectangle_blob finish(.x_in(0),.hcount_in(hcount),.y_in(42),.vcount_in(vcount),
                         .color(color),.pixel_out(finish_line));
-     
-    // streak code    
-    wire [11:0] streak_pixels;
-    streak_blob str(.pixel_clk_in(clk),.x_in(streak_x),.y_in(streak_height),
-                            .hcount_in(hcount),.vcount_in(vcount),
-                            .pixel_out(streak_pixels),.on((streak ||curr_streak)));
     
     // perfect vs imperfect line;
     wire[11:0] perfect_line; // line is blue
@@ -271,7 +274,7 @@ module visual (
             perfect_blob(.x_in(0),.hcount_in(hcount),.y_in(163),.vcount_in(vcount),
                         .color(12'h2EF),.pixel_out(perfect_line));
 
-    // alpha blending
+    // alpha blending for perfect line and arrows
     logic[11:0] arrow_p;
     logic[11:0] blended_pixels;
     logic[3:0] r_pixels,b_pixels,g_pixels;
@@ -286,12 +289,19 @@ module visual (
     assign perfect = perfect_curr;
     assign game_over = done;
     
+    // streak code    
+    wire [11:0] streak_pixels;
+    streak_blob str(.pixel_clk_in(clk),.x_in(STR_PERF_X),.y_in(STREAK_HEIGHT),
+                            .hcount_in(hcount),.vcount_in(vcount),
+                            .pixel_out(streak_pixels),.on((streak ||curr_streak)));
+
     // perfect bonus pixels
     wire [11:0] perfect_pixels;
-    perfect_bonus_blob bonus(.pixel_clk_in(clk),.x_in(streak_x),.y_in(perfect_height),
+    perfect_bonus_blob bonus(.pixel_clk_in(clk),.x_in(STR_PERF_X),.y_in(PERFECT_HEIGHT),
                             .hcount_in(hcount),.vcount_in(vcount),
                             .pixel_out(perfect_pixels),.on((correct && perfect)));
-
+    
+    // output pixels includin all blobs
     assign arrow_pixels = finish_line + blended_pixels + done_pixels +
                         score_pixels_1 + score_pixels_2 + score_pixels_3 + streak_pixels + perfect_pixels;
 
@@ -313,7 +323,7 @@ module rectangle_blob
    always_comb begin
       if ((hcount_in >= x_in && hcount_in < (x_in+WIDTH)) &&
 	 (vcount_in >= y_in && vcount_in < (y_in+HEIGHT)))
-	pixel_out = color;
+	   pixel_out = color;
       else pixel_out = 0;
    end
 endmodule

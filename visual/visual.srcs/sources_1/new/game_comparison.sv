@@ -1,12 +1,18 @@
 `timescale 1ns / 1ps
 
+//////////////////////////////////////////////////////////////////////////////////
+//
+// game_comparison: determine which squares are stepped on at the moment 
+//
+//////////////////////////////////////////////////////////////////////////////////
+
 module game_comparison(input clk,
-                       input [4:0] correct_data,
-                       input [4:0] intersection_data,
-                       input ready_in, 
+                       input [4:0] correct_data, // choreo data
+                       input [4:0] intersection_data, //sensor data
+                       input ready_in, //ready signal
                        
-                       output logic score_ready, 
-                       output logic correct
+                       output logic score_ready, // score update signal
+                       output logic correct // correct variable
     );
     
     parameter IDLE = 0;
@@ -19,8 +25,10 @@ module game_comparison(input clk,
     always_ff @(posedge clk) begin 
         case(state)
             IDLE: begin 
+                // check for risin edge of ready to check
                 prev_ready <= ready_in;
                 if (ready_in && !prev_ready) begin 
+                    // check for correct and send signal to update score
                     correct <= (intersection_data == correct_data); 
                     score_ready <= 1; 
                     state<=READY_FINAL;
