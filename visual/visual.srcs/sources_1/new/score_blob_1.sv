@@ -26,7 +26,7 @@ module score_blob_1
    score2 score(.clka(pixel_clk_in), .addra(image_addr), .douta(image_bits));    //ROM that stores the numbers
    rgbcm score1 (.clka(pixel_clk_in), .addra(image_bits), .douta(score_mapped)); //ROM for B&W color map
    
-   // pixel display logic 
+   // note the one clock cycle delay in pixel!
    always @ (posedge pixel_clk_in) begin
      if (((hcount_in >= x_in && hcount_in < (x_in+WIDTH)) && (vcount_in >= y_in && vcount_in < (y_in+HEIGHT))))
         pixel_out <= ~{score_mapped[7:4], score_mapped[7:4], score_mapped[7:4]};   

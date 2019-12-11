@@ -9,7 +9,7 @@
 module loading_blob
  #(parameter WIDTH = 395,     // default picture width
                HEIGHT = 77,   // default picture height
-               HCOUNT_LATENCY = 4)    
+               HCOUNT_LATENCY = 4) // parameter to handle pipelining issue - reads ahead
    (    input pixel_clk_in,
         input [10:0] x_in,hcount_in,
         input [9:0] y_in,vcount_in,

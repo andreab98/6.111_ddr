@@ -1,26 +1,12 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
-// Create Date: 12/05/2019 04:34:17 PM
-// Design Name: 
-// Module Name: bin_to_dec
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
+//
+// Double Dabble Algorithm - my.eng.utah.edu/~nmcdonal/Tutorials/BCDTutorial/BCDConversion.html
+// counts the number of hundreds, tens, and ones places in a 10 bit number 
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
-// Double Dabble Algorithm - my.eng.utah.edu/~nmcdonal/Tutorials/BCDTutorial/BCDConversion.html
-
+// counts the number of hundreds, tens, and ones places in a 10 bit number 
 module bin_to_dec(input [9:0] number, 
                   output logic [3:0] hundreds, output logic [3:0] tens, output logic [3:0] ones);
                   

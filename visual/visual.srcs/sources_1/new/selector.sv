@@ -30,24 +30,29 @@ module selector(
     assign pblank_out = blank;
     
     // parameters for speed and max steps based on level
-    parameter LEVEL_1 = 2'b01;
-    parameter LEVEL_2 = 2'b10;
-    parameter LEVEL_3 = 2'b11;
     
+    //levels
+    parameter LEVEL_1 = 2'b01; // basic
+    parameter LEVEL_2 = 2'b10; // difficult
+    parameter LEVEL_3 = 2'b11; // expert
+    
+    // speeds 
     parameter SPEED_1 = 2;
     parameter SPEED_2 = 4;
     parameter SPEED_3 = 8;
     
+    // max steps per game - proportional to the speed of the arrows
     parameter MAX_1 = 50;
     parameter MAX_2 = 70;
     parameter MAX_3 = 100;
     
     logic game_start = 0;
-    logic[4:0] s;
+    logic[4:0] s; // assigned speed 
     logic[10:0] max = 0;
     
     reg[3:0] state= 0;
     
+    // system states
     parameter IDLE = 0;
     parameter LEVEL_CHOOSE = 1;
     parameter DONE = 2;
@@ -58,22 +63,24 @@ module selector(
     logic expired; 
     logic counting;
     logic one_hz; 
-    logic [3:0] count_out;    
+    logic [3:0] count_out;  
+    
+    //timer module 
     timer countdown(.clock(clk), .start_timer(reset), .value(4'd6),.counting(counting), 
                     .expired_pulse(expired), .one_hz(one_hz), .count_out(count_out));
     
     
     always_ff @(posedge clk) begin 
-        if (reset) begin
+        if (reset) begin // system reset
             state<=RESET;
         end else begin
             case (state)
                 IDLE: if(start) state<=LEVEL_CHOOSE;
-                RESET: begin 
+                RESET: begin // system reset
                     game_start<=0;
                     state<=IDLE;
                 end
-                LEVEL_CHOOSE: begin
+                LEVEL_CHOOSE: begin // choose level 
                     case (level) 
                         LEVEL_1:begin
                             s <= SPEED_1;
@@ -90,7 +97,7 @@ module selector(
                     endcase
                     state<=DONE;
                 end
-                DONE: game_start<=1;
+                DONE: game_start<=1; 
             endcase
         end
     end

@@ -2,8 +2,8 @@
 
 module game_over_blob
    #(parameter WIDTH = 517,     // default picture width
-               HEIGHT = 88, 
-               HCOUNT_LATENCY = 4)    // default picture height
+               HEIGHT = 88,     // default picture height 
+               HCOUNT_LATENCY = 4)  // parameter to handle pipelining issue - reads ahead
    (input pixel_clk_in,
     input [10:0] x_in,hcount_in,
     input [9:0] y_in,vcount_in,
@@ -25,8 +25,7 @@ module game_over_blob
    // note the one clock cycle delay in pixel!
    always @ (posedge pixel_clk_in) begin
      if (on&&(((hcount_in >= x_in) && hcount_in < (x_in+WIDTH)) && (vcount_in >= y_in && vcount_in < (y_in+HEIGHT))))
-        // use MSB 4 bits
-        pixel_out <= {red_mapped[7:4], 8'h0}; // red
+        pixel_out <= {red_mapped[7:4], 8'h0}; 
         else pixel_out <= 0;
    end
 endmodule

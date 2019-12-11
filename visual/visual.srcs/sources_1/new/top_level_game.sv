@@ -19,12 +19,11 @@ module top_level_game(input clk, // system clock
                       output logic i
                        
     );
-//    ila_0 ila (.clk(clk), .probe0(score[7:0]), .probe1(sensor_data[4:0]),.probe2(correct_data[4:0]),.probe3(ready_in),
-//                .probe4(correct),.probe5(i), .probe6(0), .probe7(0));
 
     //Comparison Module Outputs
     logic score_ready; // HIGH when comparison made 
     
+    // Module that handles comparison between input data from sensors and correct data from ROM
     game_comparison compare(.clk(clk), .correct_data(correct_data), .score_ready(score_ready),
                     .intersection_data(sensor_data),.ready_in(ready_in),.correct(correct));
       

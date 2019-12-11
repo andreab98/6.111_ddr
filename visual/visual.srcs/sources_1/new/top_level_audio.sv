@@ -114,6 +114,9 @@ module top_level_audio(input clk,
     parameter WAVING_SAMPLES = 14660128;
     parameter DONT_SAMPLES = 13940805;
     
+    parameter ADDR_INCREMENT = 512; // need to increment the address by 512 bytes
+    parameter FIFO_MAX_FILL = 8096; // stop writing to the fifo/reading from the SD card when the FIFO reaches a threshold
+    
     logic past_pause; 
     
     always_ff @(posedge clk) begin
@@ -169,7 +172,7 @@ module top_level_audio(input clk,
                     end 
                     else begin
                         last_byte_available <= byte_available; //to detect rising edge of byte_available
-                        if (data_count <= 8192) begin  
+                        if (data_count <= FIFO_MAX_FILL) begin  
                             rd <= 1;
                         end else begin 
                             rd <= 0;
@@ -177,7 +180,7 @@ module top_level_audio(input clk,
                         
                         // once we read 512 bytes from the FIFO, increment address and start reading again
                         if (bytes_from_fifo >= COMPLETE_READ) begin 
-                            addr <= addr + 32'h200; // increment by multiple of 512 bytes
+                            addr <= addr + ADDR_INCREMENT; // increment by multiple of 512 bytes
                             bytes_from_fifo <= 0;
                         end 
                         
@@ -215,6 +218,7 @@ module top_level_audio(input clk,
         
     end 
     
+    // pwm module to make sound
     audio_PWM pwm(.clk_in(clk), .rst_in(reset), .level_in(data_from_fifo), .pwm_out(aud_pwm));
     
 endmodule

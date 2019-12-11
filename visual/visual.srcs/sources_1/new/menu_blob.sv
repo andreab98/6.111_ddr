@@ -7,8 +7,8 @@
 //////////////////////////////////////////////////
 module menu_blob
    #(parameter WIDTH = 400,     // default picture width
-               HEIGHT = 275,
-               HCOUNT_LATENCY = 4)    // default picture height
+               HEIGHT = 275,    // default picture height
+               HCOUNT_LATENCY = 4)  // parameter to handle pipelining issue - reads ahead
    (input pixel_clk_in,
     input [10:0] x_in, hcount_in,
     input [9:0] y_in, vcount_in,

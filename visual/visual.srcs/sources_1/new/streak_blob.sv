@@ -22,8 +22,8 @@
 
 module streak_blob
    #(parameter WIDTH = 243,     // default picture width
-               HEIGHT = 33, 
-               HCOUNT_LATENCY = 4)    // default picture height
+               HEIGHT = 33,     // default picture height 
+               HCOUNT_LATENCY = 4)    // counts the number of hundreds, tens, and ones places in a 10 bit number 
    (input pixel_clk_in,
     input [10:0] x_in,hcount_in,
     input [9:0] y_in,vcount_in,
@@ -44,7 +44,6 @@ module streak_blob
    // note the one clock cycle delay in pixel!
    always @ (posedge pixel_clk_in) begin
      if (on&&((hcount_in >= x_in && hcount_in < (x_in+WIDTH)) && (vcount_in >= y_in && vcount_in < (y_in+HEIGHT))))
-        // use MSB 4 bits
         pixel_out <= {red_mapped[7:4], 8'h0}; // red
         else pixel_out <= 0;
    end
