@@ -4,9 +4,7 @@ module top_level_game(input clk, // system clock
                       input reset, // system reset
                       input start, // games start (might not need this)
                       
-                      input perfect_check,
-                      input game_over,
-                      
+                      input perfect_check,                      
                       input [4:0] sensor_data, // data from sensors -- player's actions 
                       input [4:0] correct_data, // data stored in memory 
                       input ready_in, //HIGH when arrow passes threshold on screen
@@ -25,7 +23,7 @@ module top_level_game(input clk, // system clock
                     .intersection_data(sensor_data),.ready_in(ready_in),.correct(correct));
       
     //Score FSM Output
-    score_fsm update_score(.clk(clk), .start(start), .rst_in(reset), .game_over(game_over),
+    score_fsm update_score(.clk(clk), .start(start), .rst_in(reset),
                            .score_ready(score_ready), .correct(correct), .perfect(perfect_check),.streak_out(streak),
                            .updated_score(score));
     
