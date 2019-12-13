@@ -13,10 +13,7 @@ module top_level_game(input clk, // system clock
                       
                       output logic correct,
                       output logic streak,
-                      output logic [31:0] score,
-                      
-                      //debugging
-                      output logic i
+                      output logic [31:0] score
                        
     );
 
@@ -32,5 +29,4 @@ module top_level_game(input clk, // system clock
                            .score_ready(score_ready), .correct(correct), .perfect(perfect_check),.streak_out(streak),
                            .updated_score(score));
     
-    assign i = score_ready;
 endmodule
