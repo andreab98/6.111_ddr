@@ -12,8 +12,8 @@ module timer(clock, start_timer,  value, counting,
     parameter IDLE = 2'b01; // idle - waiting for start_timer
     parameter DECR = 2'b10; //decrementing
 
-    //constant for cycle count between 1hz events
-    parameter CYCLE_COUNT = 25000000;
+    //constant for cycle count between 1 second events
+    parameter CYCLE_COUNT = 65000000;
 
     //state begins as idle
     logic[1:0] state = IDLE;
