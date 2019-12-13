@@ -9,7 +9,6 @@
 module score_fsm(input clk, 
                  input start, 
                  input rst_in, 
-                 input game_over, 
                  input score_ready, 
                  input correct,
                  input perfect,
