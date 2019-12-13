@@ -13,3 +13,5 @@ The software for our project can be broken down into five main areas:
   * Compares the input from the sensors with the correct choreography in order to decide how to score the player on a given step.
 * Audio 
   * Communicates with an SD card in order to play audio during the game.
+  
+All COE files needed to recreate the ROM's are all located in the coe_files folder.
